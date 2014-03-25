@@ -33,6 +33,8 @@
     "cantina-session": "cantina/cantina-session#3.x",
     "cantina-auth": "cantina/cantina-auth#3.x",
     "cantina-web": "cantina/cantina-web#3.x",
+    "cantina-email": "cantina/cantina-email#3.x",
+    "cantina-tokens": "cantina/cantina-tokens#3.x",
     "mocha": "^1.18.2",
     "idgen": "^1.3.0",
     "request": "~2.34.0"

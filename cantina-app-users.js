@@ -6,6 +6,7 @@ require('cantina-models-schemas');
 
 app.loadSchemas('schemas', __dirname);
 require('./auth');
+require('./emails');
 
 app.hook('start').add(function (done) {
   app.createMongoCollection('users', app.schemas.user.getOptions({

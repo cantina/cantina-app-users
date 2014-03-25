@@ -97,8 +97,8 @@ describe('permissions', function (){
     });
   });
 
-  it('can check for anyAccess', function (done) {
-    app.permissions.anyAccess([
+  it('can check for one of many access levels', function (done) {
+    app.permissions.accessAny([
       {
         context: 'documents',
         user: 'erin',
@@ -112,6 +112,25 @@ describe('permissions', function (){
       }], function (err, can) {
       assert.ifError(err);
       assert(can);
+      done();
+    });
+  });
+
+  it('can check for all of many access levels', function (done) {
+    app.permissions.accessAll([
+      {
+        context: 'documents',
+        user: 'erin',
+        object: 'doc1',
+        verb: 'delete'
+      }, {
+        context: 'documents',
+        user: 'erin',
+        object: 'doc1',
+        verb: 'edit'
+      }], function (err, can) {
+      assert.ifError(err);
+      assert(!can);
       done();
     });
   });

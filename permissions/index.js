@@ -78,9 +78,17 @@ app.permissions = {
     });
   },
 
-  anyAccess: function (args, cb) {
+  accessAny: function (args, cb) {
     this._accessMulti(args, function (results) {
       return results.some(function (result) {
+        return !!result;
+      });
+    }, cb);
+  },
+
+  accessAll: function (args, cb) {
+    this._accessMulti(args, function (results) {
+      return results.every(function (result) {
         return !!result;
       });
     }, cb);

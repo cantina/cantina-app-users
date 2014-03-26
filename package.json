@@ -1,0 +1,28 @@
+{
+  "name": "cantina-app-users",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Drop-in users system for Cantina apps",
+  "main": "cantina-app-users.js",
+  "scripts": {
+    "test": "node_modules/.bin/mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/cantina/cantina-app-users.git"
+  },
+  "author": "Dan MacTough <dan@terraeclipse.com>",
+  "license": "none",
+  "bugs": {
+    "url": "https://github.com/cantina/cantina-app-users/issues"
+  },
+  "homepage": "https://github.com/cantina/cantina-app-users",
+  "dependencies": {
+    "modeler-mongodb": "~0.0.2"
+  },
+  "devDependencies": {
+    "cantina": "cantina/cantina#3.x",
+    "cantina-mongo": "cantina/cantina-mongo#3.x",
+    "mocha": "^1.18.2"
+  }
+}

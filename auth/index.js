@@ -1,4 +1,5 @@
 var app = require('cantina')
+  , _ = require('underscore')
   , async = require('async');
 
 app.serializeUser = function (user, cb) {
@@ -6,9 +7,10 @@ app.serializeUser = function (user, cb) {
 };
 
 app.deserializeUser = function (id, cb) {
-  app.users.load(id, cb);
+  app.collections.user.load(id, cb);
 };
 
+require('./third-party');
 require('cantina-redis');
 require('cantina-session');
 require('cantina-auth');

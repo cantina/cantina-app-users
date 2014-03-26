@@ -26,14 +26,14 @@ describe('emails', function () {
   });
 
   it('registers own email templates', function () {
-    assert(app.email.templates['cantina-app-users/account_confirm']);
-    assert(app.email.templates['cantina-app-users/email_confirm']);
-    assert(app.email.templates['cantina-app-users/invitation']);
-    assert(app.email.templates['cantina-app-users/password']);
+    assert(app.email.templates['account_confirm']);
+    assert(app.email.templates['email_confirm']);
+    assert(app.email.templates['invitation']);
+    assert(app.email.templates['password']);
   });
 
   it('can send password reset email', function (done) {
-    app.users.sendPasswordResetEmail({user: {id: 1}}, function (err) {
+    app.email.send('password', {user: {id: 1}}, function (err) {
       assert.ifError(err);
       assert.equal(app.email.sent.length, 1);
 
@@ -44,7 +44,7 @@ describe('emails', function () {
   });
 
   it ('can send account confirmation email', function (done) {
-    app.users.sendAccountConfirmEmail({user: {id: 2}}, function (err) {
+    app.email.send('account_confirm', {user: {id: 2}}, function (err) {
       assert.ifError(err);
       assert.equal(app.email.sent.length, 2);
 
@@ -55,7 +55,7 @@ describe('emails', function () {
   });
 
   it ('can send email confirmation email', function (done) {
-    app.users.sendEmailConfirmEmail({user: {id: 3}}, function (err) {
+    app.email.send('email_confirm', {user: {id: 3}}, function (err) {
       assert.ifError(err);
       assert.equal(app.email.sent.length, 3);
 
@@ -66,7 +66,7 @@ describe('emails', function () {
   });
 
   it ('can send account invitation email', function (done) {
-    app.users.sendInvitationEmail({user: {id: 4}}, function (err) {
+    app.email.send('invitation', {user: {id: 4}}, function (err) {
       assert.ifError(err);
       assert.equal(app.email.sent.length, 4);
 

@@ -5,84 +5,57 @@ var app = require('cantina')
 require('cantina-tokens');
 require('cantina-email');
 
-app.email.registerTemplateDir('cantina-app-users', require('path').resolve(__dirname, './templates'));
+app.hook('email:load:templates').add(function (done) {
+  app.email.loadTemplates(require('path').resolve(__dirname, './templates'));
+  done();
+});
 
-app.users.sendPasswordResetEmail = function (options, cb) {
+app.hook('email:send:before').add(function (name, vars, cb) {
+  var opts;
 
-  // Create an expiring token - default to 24 hrs
-  var opts = {
-    prefix: options.prefix || 'password-reset',
-    expire: options.expire || 86400000
-  };
-  app.tokens.create(options.user.id, opts, function (err, token) {
-    if (err) return cb(err);
+  // Password Reset Email
+  if (vars.template === 'password') {
 
-    options.url = options.url || url.format({
-      protocol: site.protocol,
-      host: site.domain,
-      pathname: '/password-reset/' + token
+    // Create an expiring token - default to 24 hrs
+    opts = {
+      prefix: vars.prefix || 'password-reset',
+      expire: vars.expire || 86400000
+    };
+    app.tokens.create(vars.user.id, opts, function (err, token) {
+      if (err) return cb(err);
+
+      vars.url = vars.url || url.format({
+        protocol: site.protocol,
+        host: site.domain,
+        pathname: '/password-reset/' + token
+      });
+      vars.site || (vars.site = site);
+      cb();
     });
-    options.site || (options.site = site);
-    app.email.send(options.template || 'cantina-app-users/password', options, cb);
-  });
-};
+  }
 
-app.users.sendAccountConfirmEmail = function (options, cb) {
+  // Account/Email Confirmation Emails
+  else if (vars.name === 'account_confirm' || vars.name === 'invitation' || vars.name === 'email_confirm') {
 
-  // Create an expiring token - default to 7 days
-  var opts = {
-    prefix: options.prefix || 'account',
-    expire: options.expire || 604800000
-  };
-  app.tokens.create(options.user.id, opts, function (err, token) {
-    if (err) return cb(err);
+    // Create an expiring token - default to 7 days
+    opts = {
+      prefix: vars.prefix || 'account',
+      expire: vars.expire || 604800000
+    };
+    app.tokens.create(vars.user.id, opts, function (err, token) {
+      if (err) return cb(err);
 
-    options.url = options.url || url.format({
-      protocol: site.protocol,
-      host: site.domain,
-      pathname: '/account-confirm/' + token
+      vars.url = vars.url || url.format({
+        protocol: site.protocol,
+        host: site.domain,
+        pathname: '/' + vars.name + '/' + token
+      });
+      vars.site || (vars.site = site);
+      cb();
     });
-    options.site || (options.site = site);
-    app.email.send(options.template || 'cantina-app-users/account_confirm', options, cb);
-  });
-};
+  }
 
-app.users.sendInvitationEmail = function (options, cb) {
-
-  // Create an expiring token - default to 7 days
-  var opts = {
-    prefix: options.prefix || 'account',
-    expire: options.expire || 604800000
-  };
-  app.tokens.create(options.user.id, opts, function (err, token) {
-    if (err) return cb(err);
-
-    options.url = options.url || url.format({
-      protocol: site.protocol,
-      host: site.domain,
-      pathname: '/invitation/' + token
-    });
-    options.site || (options.site = site);
-    app.email.send(options.template || 'cantina-app-users/invitation', options, cb);
-  });
-};
-
-app.users.sendEmailConfirmEmail = function (options, cb) {
-
-  // Create an expiring token - default to 7 days
-  var opts = {
-    prefix: options.prefix || 'account',
-    expire: options.expire || 604800000
-  };
-  app.tokens.create(options.user.id, opts, function (err, token) {
-    if (err) return cb(err);
-
-    options.url = options.url || url.format({
-      protocol: site.protocol,
-      host: site.domain,
-      pathname: '/email-confirm/' + token
-    });
-    options.site || (options.site = site);
-    app.email.send(options.template || 'cantina-app-users/email_confirm', options, cb);
-  });
-};
+  else {
+    cb();
+  }
+});

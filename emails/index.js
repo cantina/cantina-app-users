@@ -5,16 +5,13 @@ var app = require('cantina')
 require('cantina-tokens');
 require('cantina-email');
 
-app.hook('email:load:templates').add(function (done) {
-  app.email.loadTemplates(require('path').resolve(__dirname, './templates'));
-  done();
-});
+app.email.loadTemplates(require('path').resolve(__dirname, './templates'));
 
 app.hook('email:send:before').add(function (name, vars, cb) {
   var opts;
 
   // Password Reset Email
-  if (vars.template === 'password') {
+  if (name === 'password') {
 
     // Create an expiring token - default to 24 hrs
     opts = {
@@ -35,7 +32,7 @@ app.hook('email:send:before').add(function (name, vars, cb) {
   }
 
   // Account/Email Confirmation Emails
-  else if (vars.name === 'account_confirm' || vars.name === 'invitation' || vars.name === 'email_confirm') {
+  else if (name === 'account_confirm' || name === 'invitation' || name === 'email_confirm') {
 
     // Create an expiring token - default to 7 days
     opts = {

@@ -154,29 +154,23 @@ app.permissions.access({
 );
 ```
 
-#### `app.permissions.accessAny(optionsArray, cb)`
+#### `app.permissions.accessAny(optionsArray, defaults, cb)`
 
 Checks whether a user can perform **at least one** of an array of access
 queries.
   - `optionsArray`: an array of options hashes fitting the parameters for
   `app.permissions.access`
+  - `defaults`: (optional) an options hash that provides defaults for partial hashes
+  in the optionsArray.
   - `cb`: The callback
 
 ```js
-app.permissions.accessAny([
-  {
-    context: 'events'
-    user: userModel,
-    verb: 'edit'
-    object: eventModel
-  },
-  {
-    context: 'events'
-    user: userModel,
-    verb: 'delete'
-    object: eventModel
-  }
-], function (err, hasAnyAccess) {
+app.permissions.accessAny(
+  [ {verb: 'delete'}, {verb: 'edit'} ], {
+    context: 'documents',
+    user: 'erin',
+    object: 'doc1'
+  }, function (err, hasAnyAccess) {
   if (err) return app.emit('error', err);
   if (hasAnyAccess) {
     // do something
@@ -184,28 +178,22 @@ app.permissions.accessAny([
 );
 ```
 
-#### `app.permissions.accessAll(optionsArray, cb)`
+#### `app.permissions.accessAll(optionsArray, defaults,  cb)`
 
 Checks whether a user can perform **all** of an array of access queries.
   - `optionsArray`: an array of options hashes fitting the parameters for
   `app.permissions.access`
+  - `defaults`: (optional) an options hash that provides defaults for partial hashes
+  in the optionsArray.
   - `cb`: The callback
 
 ```js
-app.permissions.accessAll([
-  {
-    context: 'events'
-    user: userModel,
-    verb: 'edit'
-    object: eventModel
-  },
-  {
-    context: 'events'
-    user: userModel,
-    verb: 'delete'
-    object: eventModel
-  }
-], function (err, hasAllAccess) {
+app.permissions.accessAll(
+  [ {verb: 'delete'}, {verb: 'edit'} ], {
+    context: 'documents',
+    user: 'erin',
+    object: 'doc1'
+  }, function (err, hasAllAccess) {
   if (err) return app.emit('error', err);
   if (hasAllAccess) {
     // do something

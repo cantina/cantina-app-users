@@ -111,18 +111,12 @@ describe('permissions', function (){
   });
 
   it('can check for one of many access levels', function (done) {
-    app.permissions.accessAny([
-      {
+    app.permissions.accessAny(
+      [ {verb: 'delete'}, {verb: 'edit'} ], {
         context: 'documents',
         user: 'erin',
-        object: 'doc1',
-        verb: 'delete'
-      }, {
-        context: 'documents',
-        user: 'erin',
-        object: 'doc1',
-        verb: 'edit'
-      }], function (err, can) {
+        object: 'doc1'
+      }, function (err, can) {
       assert.ifError(err);
       assert(can);
       done();

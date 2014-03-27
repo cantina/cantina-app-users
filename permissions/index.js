@@ -1,6 +1,7 @@
 var app = require('cantina')
   , async = require('async')
-, relations = require('relations');
+  , _ = require('underscore')
+  , relations = require('relations');
 
 require('cantina-redis');
 
@@ -67,27 +68,38 @@ app.permissions = {
     }
   },
 
-  _accessMulti: function (args, reduce, cb) {
+  _accessMulti: function (args, defaults, reduce, cb) {
     var self = this;
 
     async.map(args, function (options, cb) {
-      self.access.apply(self, arguments);
+      if (defaults) {
+        options = _.defaults(options, defaults);
+      }
+      self.access.call(self, options, cb);
     }, function (err, results) {
       if (err) return cb(err);
       cb(null, reduce(results));
     });
   },
 
-  accessAny: function (args, cb) {
-    this._accessMulti(args, function (results) {
+  accessAny: function (args, defaults, cb) {
+    if (typeof defaults === 'function') {
+      cb = defaults;
+      defaults = null;
+    }
+    this._accessMulti(args, defaults, function (results) {
       return results.some(function (result) {
         return !!result;
       });
     }, cb);
   },
 
-  accessAll: function (args, cb) {
-    this._accessMulti(args, function (results) {
+  accessAll: function (args, defaults, cb) {
+    if (typeof defaults === 'function') {
+      cb = defaults;
+      defaults = null;
+    }
+    this._accessMulti(args, defaults, function (results) {
       return results.every(function (result) {
         return !!result;
       });

@@ -20,7 +20,8 @@
   "dependencies": {
     "modeler-mongodb": "~0.0.2",
     "relations": "~0.4.3",
-    "async": "~0.2.10"
+    "async": "~0.2.10",
+    "underscore": "~1.6.0"
   },
   "devDependencies": {
     "cantina": "cantina/cantina#3.x",

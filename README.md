@@ -1,17 +1,44 @@
 cantina-app-users
 =================
 
+Exposes [node-relations](https://github.com/carlos8f/node-relations) as `app.relations`.
+Permissions are stored in redis. Also, provides a thin wrapper around relations
+with an options-hash syntax as an alternative to natural language arguments.
 
-Permissions API
----------------
+Table of Contents
+-----------------
 
-Initializes [node-relations](https://github.com/carlos8f/node-relations) using
-the redis store. Exposed as `app.relations`.
+[This would be optional, but encouraged when there are > 3 sections]
 
-Provides a thin wrapper around relations with an options-hash syntax as an
-alternative to natural language arguments.
+- [Example](#example)
+- [Usage](#usage)
+- [API Reference](#api-reference)
+    - [`app.permissions.define(context, roles)`](#apppermissionsdefinecontext-roles)
+    - [`app.permissions.grant(options, cb)`](#apppermissionsgrantoptions-cb)
+    - [`app.permissions.revoke(options, cb)`](#apppermissionsrevokeoptions-cb)
+    - [`app.permissions.access(options, cb)`](#apppermissionsaccessoptions-cb)
+    - [`app.permissions.accessAny(optionsArray, cb)`](#apppermissionsaccessanyoptionsarray-cb)
+    - [`app.permissions.accessAll(optionsArray, cb)`](#apppermissionsaccessalloptionsarray-cb)
+    - [`app.permissions.who(options, cb)`](#apppermissionswhooptions-cb)
+    - [`app.permissions.what(options, cb)`](#apppermissionswhatoptions-cb)
+    - [`app.permissions.actions(options, cb)`](#apppermissionsactionsoptions-cb)
 
-### `app.permissions.define( context, roles )`
+Example
+-------
+
+[Quick copy-paste-type example of what this looks like in action]
+
+
+Usage
+------
+
+[Describe in more detail how to use the plugin]
+
+
+API Reference
+-------------
+
+#### `app.permissions.define(context, roles)`
 
 Proxies relations to create a context, which contains a list of roles which
 map to actions.
@@ -25,8 +52,9 @@ app.permissions.define('events', {
 });
 ```
 
+-
 
-### `app.permissions.grant( options, cb )`
+#### `app.permissions.grant(options, cb)`
 
 Grants a relations role to the user.
   - `options`: a hash of options that must contain:
@@ -37,7 +65,7 @@ Grants a relations role to the user.
   - `cb`: The callback
 
 Runs the [stact-hook](https://github.com/cpsubrian/node-stact-hooks)
-`permissions:grant (options, done)` so other plugins may react to the event.
+`permissions:grant(options, done)` so other plugins may react to the event.
 
 ```js
 app.permissions.grant({
@@ -50,7 +78,9 @@ app.permissions.grant({
 );
 ```
 
-### `app.permissions.revoke( options, cb )`
+-
+
+#### `app.permissions.revoke(options, cb)`
 
 Revokes a relations role from the user.
   - `options`: a hash of options that must contain:
@@ -61,7 +91,7 @@ Revokes a relations role from the user.
   - `cb`: The callback
 
 Runs the [stact-hook](https://github.com/cpsubrian/node-stact-hooks)
-`permissions:revoke (options, done)` so other plugins may react to the event.
+`permissions:revoke(options, done)` so other plugins may react to the event.
 
 ```js
 app.permissions.revoke({
@@ -74,7 +104,9 @@ app.permissions.revoke({
 );
 ```
 
-### `app.permissions.access( options, cb )`
+-
+
+#### `app.permissions.access(options, cb)`
 
 Checks whether a user can perform an action or has a role.
   - `options`: a hash of options that must contain:
@@ -113,7 +145,9 @@ app.permissions.access({
 );
 ```
 
-### `app.permissions.accessAny( optionsArray, cb )`
+-
+
+#### `app.permissions.accessAny(optionsArray, cb)`
 
 Checks whether a user can perform **at least one** of an array of access
 queries.
@@ -143,7 +177,9 @@ app.permissions.accessAny([
 );
 ```
 
-### `app.permissions.accessAll( optionsArray, cb )`
+-
+
+#### `app.permissions.accessAll(optionsArray, cb)`
 
 Checks whether a user can perform **all** of an array of access queries.
   - `optionsArray`: an array of options hashes fitting the parameters for
@@ -172,7 +208,9 @@ app.permissions.accessAll([
 );
 ```
 
-### `app.permissions.who( options, cb )`
+-
+
+#### `app.permissions.who(options, cb)`
 
 Returns an array of user ids who can perform an action or have a role on an
 object.
@@ -207,7 +245,9 @@ app.permissions.who({
 );
 ```
 
-### `app.permissions.what( options, cb )`
+-
+
+#### `app.permissions.what(options, cb)`
 
 Returns an array of object ids on which a user can perform an action or has a
 role.
@@ -230,19 +270,11 @@ app.permissions.what({
 
   // do something with objectIds
 );
-
-app.permissions.who({
-  context: 'events'
-  user: userModel,
-  verb: 'read'
-}, function (err, objectIds) {
-  if (err) return app.emit('error', err);
-
-  // do something with objectIds
-);
 ```
 
-### `app.permissions.actions( options, cb )`
+-
+
+#### `app.permissions.actions(options, cb)`
 
 Returns an array of verbs a user can perform on an object.
   - `options`: a hash of options that must contain:
@@ -262,3 +294,10 @@ app.permissions.actions({
   // do something with verbs
 );
 ```
+
+- - -
+
+#### Developed by [TerraEclipse](https://github.com/TerraEclipse)
+
+Terra Eclipse, Inc. is a nationally recognized political technology and
+strategy firm located in Santa Cruz, CA and Washington, D.C.

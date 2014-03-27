@@ -1,42 +1,57 @@
 cantina-app-users
 =================
 
-Exposes [node-relations](https://github.com/carlos8f/node-relations) as `app.relations`.
-Permissions are stored in redis. Also, provides a thin wrapper around relations
-with an options-hash syntax as an alternative to natural language arguments.
+Provides a solid foundation for users in a cantina application. Includes the
+user model, permissions, blah blah blah.
+
 
 Table of Contents
 -----------------
 
-[This would be optional, but encouraged when there are > 3 sections]
-
-- [Example](#example)
 - [Usage](#usage)
+- [Permissions](#permissions)
+  - [Example](#example)
+  - [Usage](#usage)
 - [API Reference](#api-reference)
-    - [`app.permissions.define(context, roles)`](#apppermissionsdefinecontext-roles)
-    - [`app.permissions.grant(options, cb)`](#apppermissionsgrantoptions-cb)
-    - [`app.permissions.revoke(options, cb)`](#apppermissionsrevokeoptions-cb)
-    - [`app.permissions.access(options, cb)`](#apppermissionsaccessoptions-cb)
-    - [`app.permissions.accessAny(optionsArray, cb)`](#apppermissionsaccessanyoptionsarray-cb)
-    - [`app.permissions.accessAll(optionsArray, cb)`](#apppermissionsaccessalloptionsarray-cb)
-    - [`app.permissions.who(options, cb)`](#apppermissionswhooptions-cb)
-    - [`app.permissions.what(options, cb)`](#apppermissionswhatoptions-cb)
-    - [`app.permissions.actions(options, cb)`](#apppermissionsactionsoptions-cb)
+    - [`app.permissions`](#apppermissions)
+      - [`app.permissions.define(context, roles)`](#apppermissionsdefinecontext-roles)
+      - [`app.permissions.grant(options, cb)`](#apppermissionsgrantoptions-cb)
+      - [`app.permissions.revoke(options, cb)`](#apppermissionsrevokeoptions-cb)
+      - [`app.permissions.access(options, cb)`](#apppermissionsaccessoptions-cb)
+      - [`app.permissions.accessAny(optionsArray, cb)`](#apppermissionsaccessanyoptionsarray-cb)
+      - [`app.permissions.accessAll(optionsArray, cb)`](#apppermissionsaccessalloptionsarray-cb)
+      - [`app.permissions.who(options, cb)`](#apppermissionswhooptions-cb)
+      - [`app.permissions.what(options, cb)`](#apppermissionswhatoptions-cb)
+      - [`app.permissions.actions(options, cb)`](#apppermissionsactionsoptions-cb)
 
-Example
--------
+Usage
+-----
+
+[Generally describe how to use the user system, what parts can be overridden, etc.]
+
+Permissions
+-----------
+
+Exposes [node-relations](https://github.com/carlos8f/node-relations) as `app.relations`.
+Permissions are stored in redis. Also, provides a thin wrapper around relations
+with an options-hash syntax as an alternative to natural language arguments.
+
+### Example
 
 [Quick copy-paste-type example of what this looks like in action]
 
 
-Usage
-------
+### Usage
 
 [Describe in more detail how to use the plugin]
 
 
 API Reference
 -------------
+
+### `app.permissions`
+
+Namespace for permission-related APIs.
 
 #### `app.permissions.define(context, roles)`
 
@@ -51,8 +66,6 @@ app.permissions.define('events', {
   attendee: ['read']
 });
 ```
-
--
 
 #### `app.permissions.grant(options, cb)`
 
@@ -78,8 +91,6 @@ app.permissions.grant({
 );
 ```
 
--
-
 #### `app.permissions.revoke(options, cb)`
 
 Revokes a relations role from the user.
@@ -103,8 +114,6 @@ app.permissions.revoke({
   if (err) return app.emit('error', err);
 );
 ```
-
--
 
 #### `app.permissions.access(options, cb)`
 
@@ -145,8 +154,6 @@ app.permissions.access({
 );
 ```
 
--
-
 #### `app.permissions.accessAny(optionsArray, cb)`
 
 Checks whether a user can perform **at least one** of an array of access
@@ -177,8 +184,6 @@ app.permissions.accessAny([
 );
 ```
 
--
-
 #### `app.permissions.accessAll(optionsArray, cb)`
 
 Checks whether a user can perform **all** of an array of access queries.
@@ -207,8 +212,6 @@ app.permissions.accessAll([
   }
 );
 ```
-
--
 
 #### `app.permissions.who(options, cb)`
 
@@ -245,8 +248,6 @@ app.permissions.who({
 );
 ```
 
--
-
 #### `app.permissions.what(options, cb)`
 
 Returns an array of object ids on which a user can perform an action or has a
@@ -271,8 +272,6 @@ app.permissions.what({
   // do something with objectIds
 );
 ```
-
--
 
 #### `app.permissions.actions(options, cb)`
 

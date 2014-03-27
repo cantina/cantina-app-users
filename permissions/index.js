@@ -116,7 +116,7 @@ app.permissions = {
       app.relations[options.context]('What is :user the :role of?', {user: user, role: options.role}, cb);
     }
     else {
-      app.relations[options.context]('What can user :verb to?', {user: user, verb: options.verb}, cb);
+      app.relations[options.context]('What can :user :verb to?', {user: user, verb: options.verb}, cb);
     }
   },
 

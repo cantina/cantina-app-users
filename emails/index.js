@@ -11,7 +11,7 @@ app.hook('email:send:before').add(function (name, vars, cb) {
   var opts;
 
   // Password Reset Email
-  if (name === 'password') {
+  if (name === 'users/password_reset') {
 
     // Create an expiring token - default to 24 hrs
     opts = {
@@ -32,7 +32,7 @@ app.hook('email:send:before').add(function (name, vars, cb) {
   }
 
   // Account/Email Confirmation Emails
-  else if (name === 'account_confirm' || name === 'invitation' || name === 'email_confirm') {
+  else if (name === 'users/account_confirm' || name === 'users/account_invitation' || name === 'users/email_confirm') {
 
     // Create an expiring token - default to 7 days
     opts = {
@@ -42,10 +42,11 @@ app.hook('email:send:before').add(function (name, vars, cb) {
     app.tokens.create(vars.user.id, opts, function (err, token) {
       if (err) return cb(err);
 
+      var pathname = name.replace(/users\//, '').replace(/_/g, '-');
       vars.url = vars.url || url.format({
         protocol: site.protocol,
         host: site.domain,
-        pathname: '/' + name + '/' + token
+        pathname: '/' + pathname + '/' + token
       });
       vars.site || (vars.site = site);
       cb();

@@ -27,14 +27,14 @@ describe('emails', function () {
   });
 
   it('registers own email templates', function () {
-    assert(app.email.templates['account_confirm']);
-    assert(app.email.templates['email_confirm']);
-    assert(app.email.templates['invitation']);
-    assert(app.email.templates['password']);
+    assert(app.email.templates['users/account_confirm']);
+    assert(app.email.templates['users/email_confirm']);
+    assert(app.email.templates['users/account_invitation']);
+    assert(app.email.templates['users/password_reset']);
   });
 
   it('can send password reset email', function (done) {
-    app.email.send('password', {user: {id: 1}}, function (err) {
+    app.email.send('users/password_reset', {user: {id: 1}}, function (err) {
       assert.ifError(err);
       assert.equal(app.email.sent.length, 1);
 
@@ -50,7 +50,7 @@ describe('emails', function () {
         id: '123'
       }
     };
-    app.hook('email:send:before').run('password', vars, function (err) {
+    app.hook('email:send:before').run('users/password_reset', vars, function (err) {
       assert.ifError(err);
       assert(vars.url);
       var parts = url.parse(vars.url);
@@ -66,7 +66,7 @@ describe('emails', function () {
 
 
   it ('can send account confirmation email', function (done) {
-    app.email.send('account_confirm', {user: {id: 2}}, function (err) {
+    app.email.send('users/account_confirm', {user: {id: 2}}, function (err) {
       assert.ifError(err);
       assert.equal(app.email.sent.length, 2);
 
@@ -82,12 +82,12 @@ describe('emails', function () {
         id: '123'
       }
     };
-    app.hook('email:send:before').run('account_confirm', vars, function (err) {
+    app.hook('email:send:before').run('users/account_confirm', vars, function (err) {
       assert.ifError(err);
       assert(vars.url);
       var parts = url.parse(vars.url);
-      assert(parts.pathname.match(/\/account_confirm\//));
-      var token = parts.pathname.replace(/\/account_confirm\//, '');
+      assert(parts.pathname.match(/\/account-confirm\//));
+      var token = parts.pathname.replace(/\/account-confirm\//, '');
       app.tokens.check(token, 'account', function (err, exists) {
         assert.ifError(err);
         assert(exists);
@@ -97,7 +97,7 @@ describe('emails', function () {
   });
 
   it ('can send email confirmation email', function (done) {
-    app.email.send('email_confirm', {user: {id: 3}}, function (err) {
+    app.email.send('users/email_confirm', {user: {id: 3}}, function (err) {
       assert.ifError(err);
       assert.equal(app.email.sent.length, 3);
 
@@ -113,12 +113,12 @@ describe('emails', function () {
         id: '123'
       }
     };
-    app.hook('email:send:before').run('email_confirm', vars, function (err) {
+    app.hook('email:send:before').run('users/email_confirm', vars, function (err) {
       assert.ifError(err);
       assert(vars.url);
       var parts = url.parse(vars.url);
-      assert(parts.pathname.match(/\/email_confirm\//));
-      var token = parts.pathname.replace(/\/email_confirm\//, '');
+      assert(parts.pathname.match(/\/email-confirm\//));
+      var token = parts.pathname.replace(/\/email-confirm\//, '');
       app.tokens.check(token, 'account', function (err, exists) {
         assert.ifError(err);
         assert(exists);
@@ -128,7 +128,7 @@ describe('emails', function () {
   });
 
   it ('can send account invitation email', function (done) {
-    app.email.send('invitation', {user: {id: 4}}, function (err) {
+    app.email.send('users/account_invitation', {user: {id: 4}}, function (err) {
       assert.ifError(err);
       assert.equal(app.email.sent.length, 4);
 
@@ -144,12 +144,12 @@ describe('emails', function () {
         id: '123'
       }
     };
-    app.hook('email:send:before').run('invitation', vars, function (err) {
+    app.hook('email:send:before').run('users/account_invitation', vars, function (err) {
       assert.ifError(err);
       assert(vars.url);
       var parts = url.parse(vars.url);
-      assert(parts.pathname.match(/\/invitation\//));
-      var token = parts.pathname.replace(/\/invitation\//, '');
+      assert(parts.pathname.match(/\/account-invitation\//));
+      var token = parts.pathname.replace(/\/account-invitation\//, '');
       app.tokens.check(token, 'account', function (err, exists) {
         assert.ifError(err);
         assert(exists);

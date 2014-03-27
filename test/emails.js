@@ -1,5 +1,6 @@
 describe('emails', function () {
-  var app;
+  var app
+    , url = require('url');
 
   before(function (done) {
     app = require('cantina');
@@ -43,6 +44,27 @@ describe('emails', function () {
     });
   });
 
+  it('adds url with token to password reset email', function (done) {
+    var vars = {
+      user: {
+        id: '123'
+      }
+    };
+    app.hook('email:send:before').run('password', vars, function (err) {
+      assert.ifError(err);
+      assert(vars.url);
+      var parts = url.parse(vars.url);
+      assert(parts.pathname.match(/\/password-reset\//));
+      var token = parts.pathname.replace(/\/password-reset\//, '');
+      app.tokens.check(token, 'password-reset', function (err, exists) {
+        assert.ifError(err);
+        assert(exists);
+        done();
+      });
+    });
+  });
+
+
   it ('can send account confirmation email', function (done) {
     app.email.send('account_confirm', {user: {id: 2}}, function (err) {
       assert.ifError(err);
@@ -51,6 +73,26 @@ describe('emails', function () {
       var email = app.email.sent[1];
       assert.equal(email.envelope.stamp, 'Postage paid, Par Avion');
       done();
+    });
+  });
+
+  it('adds url with token to account confirmation email', function (done) {
+    var vars = {
+      user: {
+        id: '123'
+      }
+    };
+    app.hook('email:send:before').run('account_confirm', vars, function (err) {
+      assert.ifError(err);
+      assert(vars.url);
+      var parts = url.parse(vars.url);
+      assert(parts.pathname.match(/\/account_confirm\//));
+      var token = parts.pathname.replace(/\/account_confirm\//, '');
+      app.tokens.check(token, 'account', function (err, exists) {
+        assert.ifError(err);
+        assert(exists);
+        done();
+      });
     });
   });
 
@@ -65,6 +107,26 @@ describe('emails', function () {
     });
   });
 
+  it('adds url with token to email confirmation email', function (done) {
+    var vars = {
+      user: {
+        id: '123'
+      }
+    };
+    app.hook('email:send:before').run('email_confirm', vars, function (err) {
+      assert.ifError(err);
+      assert(vars.url);
+      var parts = url.parse(vars.url);
+      assert(parts.pathname.match(/\/email_confirm\//));
+      var token = parts.pathname.replace(/\/email_confirm\//, '');
+      app.tokens.check(token, 'account', function (err, exists) {
+        assert.ifError(err);
+        assert(exists);
+        done();
+      });
+    });
+  });
+
   it ('can send account invitation email', function (done) {
     app.email.send('invitation', {user: {id: 4}}, function (err) {
       assert.ifError(err);
@@ -73,6 +135,26 @@ describe('emails', function () {
       var email = app.email.sent[3];
       assert.equal(email.envelope.stamp, 'Postage paid, Par Avion');
       done();
+    });
+  });
+
+  it('adds url with token to account invitation email', function (done) {
+    var vars = {
+      user: {
+        id: '123'
+      }
+    };
+    app.hook('email:send:before').run('invitation', vars, function (err) {
+      assert.ifError(err);
+      assert(vars.url);
+      var parts = url.parse(vars.url);
+      assert(parts.pathname.match(/\/invitation\//));
+      var token = parts.pathname.replace(/\/invitation\//, '');
+      app.tokens.check(token, 'account', function (err, exists) {
+        assert.ifError(err);
+        assert(exists);
+        done();
+      });
     });
   });
 });

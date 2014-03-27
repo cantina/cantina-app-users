@@ -84,12 +84,25 @@ describe('permissions', function (){
     }, function () {});
   });
 
-  it('can check for access', function (done) {
+  it('can check for access using a verb', function (done) {
     app.permissions.access({
       context: 'documents',
       user: 'erin',
       object: 'doc1',
       verb: 'delete'
+    }, function (err, can) {
+      assert.ifError(err);
+      assert(!can);
+      done();
+    });
+  });
+
+  it('can check for access using a role', function (done) {
+    app.permissions.access({
+      context: 'documents',
+      user: 'erin',
+      object: 'doc1',
+      role: 'owner'
     }, function (err, can) {
       assert.ifError(err);
       assert(!can);
@@ -135,7 +148,7 @@ describe('permissions', function (){
     });
   });
 
-  it('can get a list of users with a given access over an object', function (done) {
+  it('can get a list of users who can perform a verb an object', function (done) {
     app.permissions.who({
       verb: 'edit',
       context: 'documents',
@@ -148,9 +161,36 @@ describe('permissions', function (){
     });
   });
 
-  it('can get a list of objects a user has access to', function (done) {
+
+  it('can get a list of users who have a role on an object', function (done) {
+    app.permissions.who({
+      role: 'collaborator',
+      context: 'documents',
+      object: 'doc1'
+    }, function (err, users) {
+      assert.ifError(err);
+      assert.equal(users.length, 1);
+      assert.equal(users[0], 'erin');
+      done();
+    });
+  });
+
+  it('can get a list of objects a user has a role over', function (done) {
     app.permissions.what({
       role: 'collaborator',
+      context: 'documents',
+      user: 'erin'
+    }, function (err, objects) {
+      assert.ifError(err);
+      assert.equal(objects.length, 1);
+      assert.equal(objects[0], 'doc1');
+      done();
+    });
+  });
+
+  it('can get a list of objects a user can perform a verb on', function (done) {
+    app.permissions.what({
+      verb: 'edit',
       context: 'documents',
       user: 'erin'
     }, function (err, objects) {

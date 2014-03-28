@@ -15,14 +15,17 @@ Table of Contents
 - [API Reference](#api-reference)
     - [`app.permissions`](#apppermissions)
       - [`app.permissions.define(context, roles)`](#apppermissionsdefinecontext-roles)
-      - [`app.permissions.grant(options, cb)`](#apppermissionsgrantoptions-cb)
-      - [`app.permissions.revoke(options, cb)`](#apppermissionsrevokeoptions-cb)
-      - [`app.permissions.access(options, cb)`](#apppermissionsaccessoptions-cb)
-      - [`app.permissions.accessAny(optionsArray, cb)`](#apppermissionsaccessanyoptionsarray-cb)
-      - [`app.permissions.accessAll(optionsArray, cb)`](#apppermissionsaccessalloptionsarray-cb)
-      - [`app.permissions.who(options, cb)`](#apppermissionswhooptions-cb)
-      - [`app.permissions.what(options, cb)`](#apppermissionswhatoptions-cb)
-      - [`app.permissions.actions(options, cb)`](#apppermissionsactionsoptions-cb)
+      - [`app.permissions[context].grant(role, args, cb)`](#apppermissionscontextgrantrole-args-cb)
+      - [`app.permissions[context].revoke(role, args, cb)`](#apppermissionscontextrevokerole-args-cb)
+      - [`app.permissions[context].hasRole(role, args, cb)`](#apppermissionscontexthasrolerole-args-cb)
+      - [`app.permissions[context].can(verb, args, cb)`](#apppermissionscontextcanverb-args-cb)
+      - [`app.permissions[context].any(verbs, args, cb)`](#apppermissionscontextanyverbs-args-cb)
+      - [`app.permissions[context].all(verbs, args, cb)`](#apppermissionscontextallverbs-args-cb)
+      - [`app.permissions[context].whoIs(role, object, cb)`](#apppermissionscontextwhoisrole-object-cb)
+      - [`app.permissions[context].whoCan(verb, object, cb)`](#apppermissionscontextwhocanverb-object-cb)
+      - [`app.permissions[context].whatIs(user, role, cb)`](#apppermissionscontextwhatisuser-role-cb)
+      - [`app.permissions[context].whatCan(user, verb, cb)`](#apppermissionscontextwhatcanuser-verb-cb)
+      - [`app.permissions[context].whatActions(user, object, cb)`](#apppermissionscontextwhatactionsuser-object-cb)
 
 Usage
 -----
@@ -32,9 +35,8 @@ Usage
 Permissions
 -----------
 
-Exposes [node-relations](https://github.com/carlos8f/node-relations) as `app.relations`.
-Permissions are stored in redis. Also, provides a thin wrapper around relations
-with an options-hash syntax as an alternative to natural language arguments.
+Utilizes [node-relations](https://github.com/carlos8f/node-relations)
+for permissions stored in redis.
 
 ### Example
 
@@ -63,16 +65,16 @@ map to actions.
 ```js
 app.permissions.define('events', {
   author: ['read', 'edit', 'delete'],
-  attendee: ['read']
+  attendee: ['read'],
+  admin: ['administrate']
 });
 ```
 
-#### `app.permissions.grant(options, cb)`
+#### `app.permissions[context].grant(role, args, cb)`
 
 Grants a relations role to the user.
-  - `options`: a hash of options that must contain:
-    - `context`: The relations context name to query
-    - `role`: The role to grant
+  - `role`: The role to grant
+  - `args`: may be a user model, a user id, or a hash of:
     - `user`: The user model or id to grant the role to
     - `object`: (optional) The object model or id that the role relates to
   - `cb`: The callback
@@ -81,22 +83,23 @@ Runs the [stact-hook](https://github.com/cpsubrian/node-stact-hooks)
 `permissions:grant(options, done)` so other plugins may react to the event.
 
 ```js
-app.permissions.grant({
-  context: 'events'
+app.permissions.events.grant('author', {
   user: userModel,
-  role: 'author'
   object: eventModel
 }, function (err) {
   if (err) return app.emit('error', err);
 );
+
+app.permissions.events.grant('admin', userModel, function (err) {
+  if (err) return app.emit('error', err);
+);
 ```
 
-#### `app.permissions.revoke(options, cb)`
+#### `app.permissions[context].revoke(role, args, cb)`
 
 Revokes a relations role from the user.
-  - `options`: a hash of options that must contain:
-    - `context`: The relations context name to query
-    - `role`: The role to revoke
+  - `role`: The role to grant
+  - `args`: may be a user model, a user id, or a hash of:
     - `user`: The user model or id to grant the role to
     - `object`: (optional) The object model or id that the role relates to
   - `cb`: The callback
@@ -105,34 +108,30 @@ Runs the [stact-hook](https://github.com/cpsubrian/node-stact-hooks)
 `permissions:revoke(options, done)` so other plugins may react to the event.
 
 ```js
-app.permissions.revoke({
-  context: 'events'
+app.permissions.events.revoke('author', {
   user: userModel,
-  role: 'author'
   object: eventModel
 }, function (err) {
   if (err) return app.emit('error', err);
 );
+
+app.permissions.events.revoke('admin', userModel, function (err) {
+  if (err) return app.emit('error', err);
+);
 ```
 
-#### `app.permissions.access(options, cb)`
+#### `app.permissions[context].hasRole(role, args, cb)`
 
-Checks whether a user can perform an action or has a role.
-  - `options`: a hash of options that must contain:
-    - `context`: The relations context name to query
-    - `role`: (optional) The role to check for
-    - `verb`: (optional) The verb to check for
-    - `user`: The user model or id to check access for
-    - `object`: (optional) The object model or id that the query relates to
+Checks whether a user has a role.
+  - `role`: The role to check for
+  - `args`: may be a user model, a user id, or a hash of:
+    - `user`: The user model or id to grant the role to
+    - `object`: (optional) The object model or id that the role relates to
   - `cb`: The callback
 
-Your query must contain one of `role` or `verb`, but not both.
-
 ```js
-app.permissions.access({
-  context: 'events'
+app.permissions.events.hasRole('author', {
   user: userModel,
-  role: 'author'
   object: eventModel
 }, function (err, hasRole) {
   if (err) return app.emit('error', err);
@@ -141,10 +140,26 @@ app.permissions.access({
   }
 );
 
-app.permissions.access({
-  context: 'events'
+app.permissions.events.hasRole('admin', userModel, function (err, hasRole) {
+  if (err) return app.emit('error', err);
+  if (hasRole) {
+    // do something
+  }
+);
+```
+
+#### `app.permissions[context].can(verb, args, cb)`
+
+Checks whether a user can perform an action.
+  - `verb`: The action to check for
+  - `args`: may be a user model, a user id, or a hash of:
+    - `user`: The user model or id to grant the role to
+    - `object`: (optional) The object model or id that the role relates to
+  - `cb`: The callback
+
+```js
+app.permissions.events.can('edit', {
   user: userModel,
-  verb: 'edit'
   object: eventModel
 }, function (err, hasAccess) {
   if (err) return app.emit('error', err);
@@ -152,22 +167,26 @@ app.permissions.access({
     // do something
   }
 );
+
+app.permissions.events.can('administrate', userModel, function (err, hasAccess) {
+  if (err) return app.emit('error', err);
+  if (hasAccess) {
+    // do something
+  }
+);
 ```
 
-#### `app.permissions.accessAny(optionsArray, defaults, cb)`
+#### `app.permissions[context].any(verbs, args, cb)`
 
-Checks whether a user can perform **at least one** of an array of access
-queries.
-  - `optionsArray`: an array of options hashes fitting the parameters for
-  `app.permissions.access`
-  - `defaults`: (optional) an options hash that provides defaults for partial hashes
-  in the optionsArray.
+Checks whether a user can perform **at least one** of an array of actions
+  - `verbs`: an array of actions to check for
+  - `args`: may be a user model, a user id, or a hash of:
+    - `user`: The user model or id to grant the role to
+    - `object`: (optional) The object model or id that the role relates to
   - `cb`: The callback
 
 ```js
-app.permissions.accessAny(
-  [ {verb: 'delete'}, {verb: 'edit'} ], {
-    context: 'documents',
+app.permissions.events.any(['delete', 'edit'], {
     user: 'erin',
     object: 'doc1'
   }, function (err, hasAnyAccess) {
@@ -178,19 +197,17 @@ app.permissions.accessAny(
 );
 ```
 
-#### `app.permissions.accessAll(optionsArray, defaults,  cb)`
+#### `app.permissions[context].all(verbs, args,  cb)`
 
-Checks whether a user can perform **all** of an array of access queries.
-  - `optionsArray`: an array of options hashes fitting the parameters for
-  `app.permissions.access`
-  - `defaults`: (optional) an options hash that provides defaults for partial hashes
-  in the optionsArray.
+Checks whether a user can perform **all** of an array of actions.
+  - `verbs`: an array of actions to check for
+  - `args`: may be a user model, a user id, or a hash of:
+    - `user`: The user model or id to grant the role to
+    - `object`: (optional) The object model or id that the role relates to
   - `cb`: The callback
 
 ```js
-app.permissions.accessAll(
-  [ {verb: 'delete'}, {verb: 'edit'} ], {
-    context: 'documents',
+app.permissions.events.all(['delete', 'edit' ], {
     user: 'erin',
     object: 'doc1'
   }, function (err, hasAllAccess) {
@@ -201,81 +218,77 @@ app.permissions.accessAll(
 );
 ```
 
-#### `app.permissions.who(options, cb)`
+#### `app.permissions[context].whoCan(verb, object, cb)`
 
-Returns an array of user ids who can perform an action or have a role on an
-object.
-  - `options`: a hash of options that must contain:
-    - `context`: The relations context name to query
-    - `role`: (optional) The role to check for
-    - `verb`: (optional) The verb to check for
-    - `object`: The object model or id that the query relates to
+Returns an array of user ids who can perform an action on an object.
+  - `verb`: The verb to check for
+  - `object`: The object model or id that the query relates to
   - `cb`: The callback
 
-Your query must contain one of `role` or `verb`, but not both.
-
 ```js
-app.permissions.who({
-  context: 'events'
-  role: 'author'
-  object: eventModel
-}, function (err, userIds) {
-  if (err) return app.emit('error', err);
-
-  // do something with userIds
-);
-
-app.permissions.who({
-  context: 'events'
-  verb: 'read'
-  object: eventModel
-}, function (err, userIds) {
+app.permissions.events.whoCan('read', eventModel, function (err, userIds) {
   if (err) return app.emit('error', err);
 
   // do something with userIds
 );
 ```
 
-#### `app.permissions.what(options, cb)`
 
-Returns an array of object ids on which a user can perform an action or has a
-role.
-  - `options`: a hash of options that must contain:
-    - `context`: The relations context name to query
-    - `role`: (optional) The role to check for
-    - `verb`: (optional) The verb to check for
-    - `user`: The user model or id to check access for
+#### `app.permissions[context].whoIs(role, object, cb)`
+
+Returns an array of user ids who have a role over an object.
+  - `role`: The role to check for
+  - `object`: The object model or id that the query relates to
   - `cb`: The callback
 
-Your query must contain one of `role` or `verb`, but not both.
+```js
+app.permissions.events.whoIs('author', eventModel, function (err, userIds) {
+  if (err) return app.emit('error', err);
+
+  // do something with userIds
+);
+```
+
+#### `app.permissions[context].whatCan(user, verb, cb)`
+
+Returns an array of object ids on which a user can perform an action.
+  - `user`: The user model or id to check access for
+  - `verb`: The verb to check for
+  - `cb`: The callback
 
 ```js
-app.permissions.what({
-  context: 'events'
-  user: userModel,
-  role: 'author'
-}, function (err, objectIds) {
+app.permissions.events.whatCan(userModel, 'edit', function (err, objectIds) {
   if (err) return app.emit('error', err);
 
   // do something with objectIds
 );
 ```
 
-#### `app.permissions.actions(options, cb)`
 
-Returns an array of verbs a user can perform on an object.
-  - `options`: a hash of options that must contain:
-    - `context`: The relations context name to query
-    - `user`: The user model or id to check access for
-    - `object`: The object model or id that the query relates to
+#### `app.permissions[context].whatIs(user, role, cb)`
+
+Returns an array of object ids on which a user has a role
+  - `user`: The user model or id to check access for
+  - `role`: The role to check for
   - `cb`: The callback
 
 ```js
-app.permissions.actions({
-  context: 'events'
-  user: userModel,
-  objects: eventModel
-}, function (err, verbs) {
+app.permissions.events.whatIs(userModel, 'author', function (err, objectIds) {
+  if (err) return app.emit('error', err);
+
+  // do something with objectIds
+);
+```
+
+#### `app.permissions[context].whatActions(user, object, cb)`
+
+Returns an array of verbs a user can perform on an object.
+  - `user`: The user model or id to check access for
+  - `object`: The object model or id that the query relates to
+  - `cb`: The callback
+
+```js
+app.permissions.events.whatActions(userModel, eventModel, function (err, verbs) {
   if (err) return app.emit('error', err);
 
   // do something with verbs

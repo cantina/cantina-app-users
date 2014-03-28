@@ -10,134 +10,143 @@ relations.use(relations.stores.redis, {
   prefix: app.redisKey('relations')
 });
 
-//Expose relations directly
-app.relations = relations;
-
-//Expose helper functions for relations functionality
 app.permissions = {
 
-  define: function () {
-    return app.relations.define.apply(app.relations, arguments);
-  },
+  define: function (ctx, roles) {
+    relations.define.apply(relations, arguments);
 
-  grant: function grant (options, cb) {
-    if (!app.relations[options.context]) {
-      return cb(new Error('Invalid context passed to app.permissions.grant()'));
-    }
-    var user = options.user.id ? options.user.id : options.user
-      , object = options.object ? (options.object.id ? options.object.id : options.object) : null;
+    app.permissions[ctx] = {
 
-    app.relations[options.context](':user is a :role' + (object ? ' of :object' : ''), {
-      user: user,
-      role: options.role,
-      object: object
-    }, function (err) {
-      if (err) return cb(err);
-      app.hook('permissions:grant').run({object: object, user: user, context: options.context, role: options.role}, cb);
-    });
-  },
+      grant: function (role, args, cb) {
+        var user, object;
+        if (typeof args == 'string') {
+          user = args;
+          object = null;
+        }
+        else if (args.user) {
+          user = args.user.id ? args.user.id : args.user;
+          object = args.object ? (args.object.id ? args.object.id : args.object) : null;
+        }
+        else {
+          user = args.id;
+          object = null;
+        }
+        relations[ctx](':user is a :role' + (object ? ' of :object' : ''), {
+          user: user,
+          role: role,
+          object: object
+        }, function (err) {
+          if (err) return cb(err);
+          app.hook('permissions:grant').run({object: object, user: user, context: ctx, role: role}, cb);
+        });
+      },
 
-  revoke: function revoke (options, cb) {
-    if (!app.relations[options.context]) {
-      return cb(new Error('Invalid context passed to app.permissions.revoke()'));
-    }
-    var user = options.user.id ? options.user.id : options.user
-      , object = options.object ? (options.object.id ? options.object.id : options.object) : null;
+      revoke: function (role, args, cb) {
+        var user, object;
+        if (typeof args == 'string') {
+          user = args;
+          object = null;
+        }
+        else if (args.user) {
+          user = args.user.id ? args.user.id : args.user;
+          object = args.object ? (args.object.id ? args.object.id : args.object) : null;
+        }
+        else {
+          user = args.id;
+          object = null;
+        }
+        relations[ctx](':user is not a :role' + (object ? ' of :object' : ''), {
+          user: user,
+          role: role,
+          object: object
+        }, function (err) {
+          if (err) return cb(err);
+          app.hook('permissions:revoke').run({object: object, user: user, context: ctx, role: role}, cb);
+        });
+      },
 
-    app.relations[options.context](':user is not a :role' + (object ? ' of :object' : ''), {
-      user: user,
-      role: options.role,
-      object: object
-    }, function (err) {
-      if (err) return cb(err);
-      app.hook('permissions:revoke').run({object: object, user: user, context: options.context, role: options.role}, cb);
-    });
-  },
+      hasRole: function (role, args, cb) {
+        var user, object;
+        if (typeof args == 'string') {
+          user = args;
+          object = null;
+        }
+        else if (args.user) {
+          user = args.user.id ? args.user.id : args.user;
+          object = args.object ? (args.object.id ? args.object.id : args.object) : null;
+        }
+        else {
+          user = args.id;
+          object = null;
+        }
+        user = user.id ? user.id : user;
+        relations[ctx]('Is :user a :role' + (object ? ' of :object?' : '?'), {object: object, user: user, role: role}, cb);
+      },
 
-  access: function access (options, cb) {
-    if (!app.relations[options.context]) {
-      return cb(new Error('Invalid context passed to app.permissions.access()'));
-    }
-    var user = options.user.id ? options.user.id : options.user
-      , object = options.object ? (options.object.id ? options.object.id : options.object) : null;
-    if (options.role) {
-      app.relations[options.context]('Is :user a :role' + (object ? ' of :object?' : '?'), {user: user, role: options.role, object: object}, cb);
-    }
-    else {
-      app.relations[options.context]('Can :user :verb' + (object ? ' to :object?' : '?'), {user: user, verb: options.verb, object: object}, cb);
-    }
-  },
+      can: function (verb, args, cb) {
+        var user, object;
+        if (typeof args == 'string') {
+          user = args;
+          object = null;
+        }
+        else if (args.user) {
+          user = args.user.id ? args.user.id : args.user;
+          object = args.object ? (args.object.id ? args.object.id : args.object) : null;
+        }
+        else {
+          user = args.id;
+          object = null;
+        }
+        relations[ctx]('Can :user :verb' + (object ? ' to :object?' : '?'), {user: user, verb: verb, object: object}, cb);
+      },
 
-  _accessMulti: function (args, defaults, reduce, cb) {
-    var self = this;
+      any: function (verbs, args, cb) {
+        async.map(verbs, function (verb, next) {
+          app.permissions[ctx].can(verb, args, next);
+        }, function (err, results) {
+          if (err) return cb(err);
+          return cb(null, results.some(function (result) {
+            return !!result;
+          }));
+        });
+      },
 
-    async.map(args, function (options, cb) {
-      if (defaults) {
-        options = _.defaults(options, defaults);
+      all: function (verbs, args, cb) {
+        async.map(verbs, function (verb, next) {
+          app.permissions[ctx].can(verb, args, next);
+        }, function (err, results) {
+          if (err) return cb(err);
+          return cb(null, results.every(function (result) {
+            return !!result;
+          }));
+        });
+      },
+
+      whoIs: function (role, object, cb) {
+        object = object.id ? object.id : object;
+        relations[ctx]('Who is the :role of :object?', {role: role, object: object}, cb);
+      },
+
+      whoCan: function (verb, object, cb) {
+        object = object.id ? object.id : object;
+        relations[ctx]('Who can :verb to :object?', {verb: verb, object: object}, cb);
+      },
+
+      whatIs: function (user, role, cb) {
+        user = user.id ? user.id : user;
+        relations[ctx]('What is :user the :role of?', {user: user, role: role}, cb);
+      },
+
+      whatCan: function (user, verb, cb) {
+        user = user.id ? user.id : user;
+        relations[ctx]('What can :user :verb to?', {user: user, verb: verb}, cb);
+      },
+
+      whatActions: function (user, object, cb) {
+        user = user.id ? user.id : user;
+        object = object.id ? object.id : object;
+        relations[ctx]('What actions can :user do with :object', {user: user, object: object}, cb);
       }
-      self.access.call(self, options, cb);
-    }, function (err, results) {
-      if (err) return cb(err);
-      cb(null, reduce(results));
-    });
-  },
-
-  accessAny: function (args, defaults, cb) {
-    if (typeof defaults === 'function') {
-      cb = defaults;
-      defaults = null;
     }
-    this._accessMulti(args, defaults, function (results) {
-      return results.some(function (result) {
-        return !!result;
-      });
-    }, cb);
-  },
-
-  accessAll: function (args, defaults, cb) {
-    if (typeof defaults === 'function') {
-      cb = defaults;
-      defaults = null;
-    }
-    this._accessMulti(args, defaults, function (results) {
-      return results.every(function (result) {
-        return !!result;
-      });
-    }, cb);
-  },
-
-  who: function who (options, cb) {
-    if (!app.relations[options.context]) {
-      return cb(new Error('Invalid context passed to app.permissions.who()'));
-    }
-    var object = options.object ? (options.object.id ? options.object.id : options.object) : null;
-    if (options.role) {
-      app.relations[options.context]('Who is the :role' + (object ? ' of :object?' : '?'), {role: options.role, object: object}, cb);
-    }
-    else {
-      app.relations[options.context]('Who can :verb' + (object ? ' to :object?' : '?'), {verb: options.verb, object: object}, cb);
-    }
-  },
-
-  what: function what (options, cb) {
-    if (!app.relations[options.context]) {
-      return cb(new Error('Invalid context passed to app.permissions.what()'));
-    }
-    var user = options.user.id ? options.user.id : options.user;
-    if (options.role) {
-      app.relations[options.context]('What is :user the :role of?', {user: user, role: options.role}, cb);
-    }
-    else {
-      app.relations[options.context]('What can :user :verb to?', {user: user, verb: options.verb}, cb);
-    }
-  },
-
-  actions: function actions (options, cb) {
-    if (!app.relations[options.context]) {
-      return cb(new Error('Invalid context passed to app.permissions.actions()'));
-    }
-    var user = options.user.id ? options.user.id : options.user
-      , object = options.object ? (options.object.id ? options.object.id : options.object) : null;
-    app.relations[options.context]('What actions can :user do with :object?', {user: user, object: object}, cb);
   }
 };

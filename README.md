@@ -26,6 +26,7 @@ Table of Contents
       - [`app.permissions[context].whatIs(user, role, cb)`](#apppermissionscontextwhatisuser-role-cb)
       - [`app.permissions[context].whatCan(user, verb, cb)`](#apppermissionscontextwhatcanuser-verb-cb)
       - [`app.permissions[context].whatActions(user, object, cb)`](#apppermissionscontextwhatactionsuser-object-cb)
+    - [`req.access(context, verb, cb)`](#reqaccesscontext-verb-cb)
 
 Usage
 -----
@@ -63,7 +64,7 @@ map to actions.
   - `roles`: A hash of roles and verbs
 
 ```js
-app.permissions.define('events', {
+app.permissions.define('event', {
   author: ['read', 'edit', 'delete'],
   attendee: ['read'],
   admin: ['administrate']
@@ -83,14 +84,14 @@ Runs the [stact-hook](https://github.com/cpsubrian/node-stact-hooks)
 `permissions:grant(options, done)` so other plugins may react to the event.
 
 ```js
-app.permissions.events.grant('author', {
+app.permissions.event.grant('author', {
   user: userModel,
   object: eventModel
 }, function (err) {
   if (err) return app.emit('error', err);
 );
 
-app.permissions.events.grant('admin', userModel, function (err) {
+app.permissions.event.grant('admin', userModel, function (err) {
   if (err) return app.emit('error', err);
 );
 ```
@@ -108,14 +109,14 @@ Runs the [stact-hook](https://github.com/cpsubrian/node-stact-hooks)
 `permissions:revoke(options, done)` so other plugins may react to the event.
 
 ```js
-app.permissions.events.revoke('author', {
+app.permissions.event.revoke('author', {
   user: userModel,
   object: eventModel
 }, function (err) {
   if (err) return app.emit('error', err);
 );
 
-app.permissions.events.revoke('admin', userModel, function (err) {
+app.permissions.event.revoke('admin', userModel, function (err) {
   if (err) return app.emit('error', err);
 );
 ```
@@ -130,7 +131,7 @@ Checks whether a user has a role.
   - `cb`: The callback
 
 ```js
-app.permissions.events.hasRole('author', {
+app.permissions.event.hasRole('author', {
   user: userModel,
   object: eventModel
 }, function (err, hasRole) {
@@ -140,7 +141,7 @@ app.permissions.events.hasRole('author', {
   }
 );
 
-app.permissions.events.hasRole('admin', userModel, function (err, hasRole) {
+app.permissions.event.hasRole('admin', userModel, function (err, hasRole) {
   if (err) return app.emit('error', err);
   if (hasRole) {
     // do something
@@ -158,7 +159,7 @@ Checks whether a user can perform an action.
   - `cb`: The callback
 
 ```js
-app.permissions.events.can('edit', {
+app.permissions.event.can('edit', {
   user: userModel,
   object: eventModel
 }, function (err, hasAccess) {
@@ -168,7 +169,7 @@ app.permissions.events.can('edit', {
   }
 );
 
-app.permissions.events.can('administrate', userModel, function (err, hasAccess) {
+app.permissions.event.can('administrate', userModel, function (err, hasAccess) {
   if (err) return app.emit('error', err);
   if (hasAccess) {
     // do something
@@ -186,7 +187,7 @@ Checks whether a user can perform **at least one** of an array of actions
   - `cb`: The callback
 
 ```js
-app.permissions.events.any(['delete', 'edit'], {
+app.permissions.event.any(['delete', 'edit'], {
     user: 'erin',
     object: 'doc1'
   }, function (err, hasAnyAccess) {
@@ -207,7 +208,7 @@ Checks whether a user can perform **all** of an array of actions.
   - `cb`: The callback
 
 ```js
-app.permissions.events.all(['delete', 'edit' ], {
+app.permissions.event.all(['delete', 'edit' ], {
     user: 'erin',
     object: 'doc1'
   }, function (err, hasAllAccess) {
@@ -226,7 +227,7 @@ Returns an array of user ids who can perform an action on an object.
   - `cb`: The callback
 
 ```js
-app.permissions.events.whoCan('read', eventModel, function (err, userIds) {
+app.permissions.event.whoCan('read', eventModel, function (err, userIds) {
   if (err) return app.emit('error', err);
 
   // do something with userIds
@@ -242,7 +243,7 @@ Returns an array of user ids who have a role over an object.
   - `cb`: The callback
 
 ```js
-app.permissions.events.whoIs('author', eventModel, function (err, userIds) {
+app.permissions.event.whoIs('author', eventModel, function (err, userIds) {
   if (err) return app.emit('error', err);
 
   // do something with userIds
@@ -257,7 +258,7 @@ Returns an array of object ids on which a user can perform an action.
   - `cb`: The callback
 
 ```js
-app.permissions.events.whatCan(userModel, 'edit', function (err, objectIds) {
+app.permissions.event.whatCan(userModel, 'edit', function (err, objectIds) {
   if (err) return app.emit('error', err);
 
   // do something with objectIds
@@ -273,7 +274,7 @@ Returns an array of object ids on which a user has a role
   - `cb`: The callback
 
 ```js
-app.permissions.events.whatIs(userModel, 'author', function (err, objectIds) {
+app.permissions.event.whatIs(userModel, 'author', function (err, objectIds) {
   if (err) return app.emit('error', err);
 
   // do something with objectIds
@@ -288,12 +289,32 @@ Returns an array of verbs a user can perform on an object.
   - `cb`: The callback
 
 ```js
-app.permissions.events.whatActions(userModel, eventModel, function (err, verbs) {
+app.permissions.event.whatActions(userModel, eventModel, function (err, verbs) {
   if (err) return app.emit('error', err);
 
   // do something with verbs
 );
 ```
+
+### `req.access(context, verb, cb)`
+
+Middleware providing convenience for request access queries.
+  - `context`: The relations context for the query
+  - `verb`: The action to query for
+  - `cb`: The callback
+
+`req.user` and `req[context]` must be present to use this method.
+
+```js
+req.access('event', 'edit', function (err, canEdit) {
+  if (err) return app.emit('error', err);
+
+  if (canEdit) {
+    // do something
+  }
+);
+```
+
 
 - - -
 

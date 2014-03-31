@@ -18,7 +18,7 @@ describe('permissions', function (){
   });
 
   it('can define a context', function (done) {
-    app.permissions.define('documents', {
+    app.permissions.define('document', {
       owner: ['read', 'edit', 'delete'],
       viewer:['read'],
       collaborator: ['read', 'edit'],
@@ -28,14 +28,14 @@ describe('permissions', function (){
   });
 
   it('can grant a role on an object', function (done) {
-    app.permissions['documents'].grant('owner', {user: 'erin', object: {id: 'doc1'}}, function (err) {
+    app.permissions['document'].grant('owner', {user: 'erin', object: {id: 'doc1'}}, function (err) {
       assert.ifError(err);
       done();
     });
   });
 
   it('can grant a role without an object', function (done) {
-    app.permissions['documents'].grant('admin', 'erin', function (err) {
+    app.permissions['document'].grant('admin', 'erin', function (err) {
       assert.ifError(err);
       done();
     })
@@ -50,11 +50,11 @@ describe('permissions', function (){
       calledOnce = true;
       done();
     });
-    app.permissions['documents'].grant('collaborator', {user: 'erin', object: {id: 'doc1'}}, function () {});
+    app.permissions['document'].grant('collaborator', {user: 'erin', object: {id: 'doc1'}}, function () {});
   });
 
   it('can revoke a role', function (done) {
-    app.permissions['documents'].revoke('owner', {user: {id: 'erin'}, object: 'doc1'}, function (err) {
+    app.permissions['document'].revoke('owner', {user: {id: 'erin'}, object: 'doc1'}, function (err) {
       assert.ifError(err);
       done();
     });
@@ -69,11 +69,11 @@ describe('permissions', function (){
       calledOnce = true;
       done();
     });
-    app.permissions['documents'].revoke('owner', {user: {id: 'erin'}, object: 'doc1'}, function () {});
+    app.permissions['document'].revoke('owner', {user: {id: 'erin'}, object: 'doc1'}, function () {});
   });
 
   it('can check if a user can perform a verb on an object', function (done) {
-    app.permissions['documents'].can('delete', {user: 'erin', object: 'doc1'}, function (err, can) {
+    app.permissions['document'].can('delete', {user: 'erin', object: 'doc1'}, function (err, can) {
       assert.ifError(err);
       assert(!can);
       done();
@@ -81,7 +81,7 @@ describe('permissions', function (){
   });
 
   it('can check if a user can perform a verb without an object', function (done) {
-    app.permissions['documents'].can('administrate', {id: 'erin'}, function (err, can) {
+    app.permissions['document'].can('administrate', {id: 'erin'}, function (err, can) {
       assert.ifError(err);
       assert(can);
       done();
@@ -89,7 +89,7 @@ describe('permissions', function (){
   });
 
   it('can check if a user has a role', function (done) {
-    app.permissions['documents'].hasRole('owner', {user: 'erin', object: 'doc1'}, function (err, can) {
+    app.permissions['document'].hasRole('owner', {user: 'erin', object: 'doc1'}, function (err, can) {
       assert.ifError(err);
       assert(!can);
       done();
@@ -97,7 +97,7 @@ describe('permissions', function (){
   });
 
   it('can check for one of many access levels', function (done) {
-    app.permissions['documents'].any(['delete', 'edit'], {user: 'erin', object: 'doc1'}, function (err, can) {
+    app.permissions['document'].any(['delete', 'edit'], {user: 'erin', object: 'doc1'}, function (err, can) {
       assert.ifError(err);
       assert(can);
       done();
@@ -105,7 +105,7 @@ describe('permissions', function (){
   });
 
   it('can check for all of many access levels', function (done) {
-    app.permissions['documents'].all(['delete', 'edit'], {user: 'erin', object: 'doc1'}, function (err, can) {
+    app.permissions['document'].all(['delete', 'edit'], {user: 'erin', object: 'doc1'}, function (err, can) {
       assert.ifError(err);
       assert(!can);
       done();
@@ -113,7 +113,7 @@ describe('permissions', function (){
   });
 
   it('can get a list of users who can perform a verb an object', function (done) {
-    app.permissions['documents'].whoCan('edit', 'doc1', function (err, users) {
+    app.permissions['document'].whoCan('edit', 'doc1', function (err, users) {
       assert.ifError(err);
       assert.equal(users.length, 1);
       assert.equal(users[0], 'erin');
@@ -123,7 +123,7 @@ describe('permissions', function (){
 
 
   it('can get a list of users who have a role on an object', function (done) {
-    app.permissions['documents'].whoIs('collaborator', 'doc1', function (err, users) {
+    app.permissions['document'].whoIs('collaborator', 'doc1', function (err, users) {
       assert.ifError(err);
       assert.equal(users.length, 1);
       assert.equal(users[0], 'erin');
@@ -132,7 +132,7 @@ describe('permissions', function (){
   });
 
   it('can get a list of objects a user has a role over', function (done) {
-    app.permissions['documents'].whatIs('erin', 'collaborator', function (err, objects) {
+    app.permissions['document'].whatIs('erin', 'collaborator', function (err, objects) {
       assert.ifError(err);
       assert.equal(objects.length, 1);
       assert.equal(objects[0], 'doc1');
@@ -141,7 +141,7 @@ describe('permissions', function (){
   });
 
   it('can get a list of objects a user can perform a verb on', function (done) {
-    app.permissions['documents'].whatCan('erin', 'edit', function (err, objects) {
+    app.permissions['document'].whatCan('erin', 'edit', function (err, objects) {
       assert.ifError(err);
       assert.equal(objects.length, 1);
       assert.equal(objects[0], 'doc1');
@@ -150,7 +150,7 @@ describe('permissions', function (){
   });
 
   it('can get a list of actions a user can do to an object', function (done) {
-    app.permissions['documents'].whatActions('erin', 'doc1', function (err, actions) {
+    app.permissions['document'].whatActions('erin', 'doc1', function (err, actions) {
       assert.ifError(err);
       assert.equal(actions.length, 2);
       assert(actions.indexOf('read') >= 0);

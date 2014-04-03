@@ -16,29 +16,34 @@ describe('Authentication', function () {
 
       app.start(function (err) {
         if (err) return done(err);
+        var controller = app.controller();
 
-        app.middleware.get('/log-in', function (req, res) {
+        controller.get('/test-login', function (req, res) {
           res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
           app.auth.logIn(user, req, res, function (err) {
             assert.ifError(err);
+            assert(req.isAuthenticated());
             res.end('<body>Welcome!</body>');
           });
         });
-        app.middleware.get('/log-out', function (req, res) {
+        controller.get('/test-logout', function (req, res) {
           res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
           req.user = user;
           app.auth.logOut(req, function (err) {
             assert.ifError(err);
+            assert(!req.isAuthenticated());
             res.end('<body>Goodbye!</body>');
           });
         });
+
+        app.middleware.add(controller);
         done();
       });
     });
   });
 
   it('should create a session upon login', function (done) {
-    http.get('http://localhost:3000/log-in', function () {
+    http.get('http://localhost:3000/test-login', function () {
       var key = app.redisKey('sessions', user.id);
       app.redis.SMEMBERS(key, function (err, members) {
         assert.ifError(err);
@@ -51,7 +56,7 @@ describe('Authentication', function () {
   });
 
   it('should delete all sessions upon logout', function (done) {
-    http.get('http://localhost:3000/log-out', function () {
+    http.get('http://localhost:3000/test-logout', function () {
       var key = app.redisKey('sessions', user.id);
       app.redis.SMEMBERS(key, function (err, members) {
         assert.ifError(err);

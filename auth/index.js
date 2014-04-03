@@ -7,7 +7,7 @@ app.serializeUser = function (user, cb) {
 };
 
 app.deserializeUser = function (id, cb) {
-  app.collections.user.load(id, cb);
+  app.collections.users.load(id, cb);
 };
 
 require('./third-party');

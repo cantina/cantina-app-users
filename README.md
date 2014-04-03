@@ -10,6 +10,8 @@ Table of Contents
 - [Usage](#usage)
 - [Authentication](#authentication)
   - [Example](#example)
+- [Email API](#email-api)
+  - [Example](#example)
 - [API Reference](#api-reference)
   - [`app.users`](#appusers)
     - [`app.users.findByAuth(email, password, cb)`](#appusersfindbyauthemail-password-cb)
@@ -143,7 +145,7 @@ the existing user account with matching `email`on `app.collections.user`.
 
 
 Email API
----------
+--------------
 
 Provides templates and hooks for emails user account related emails.
 

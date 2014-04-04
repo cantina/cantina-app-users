@@ -1,11 +1,26 @@
 var app = require('cantina');
 
+if (app.conf.get('auth-twitter') || app.conf.get('auth-facebook')) {
+  app.users.schema = app.schemas.extend(app.users.schema, {
+    properties: {
+      provider_id: {
+        type: 'string'
+      },
+      provider: {
+        type: 'string'
+      }
+    }
+  });
+
+  app.users.schema._indexes.push({provider_id: 1});
+}
+
 function createOrUpdateProfile (data, done) {
 
   // Verify user data, then load/save the user model.
   if (data && data.provider_id) {
 
-    app.users.find({provider_id: data.id}, function(err, user) {
+    app.collections.users.find({provider_id: data.id}, function(err, user) {
       if (err) return done(err);
       if (user) {
         // Update local user data from upstream
@@ -31,8 +46,11 @@ app.verifyTwitterUser = function (token, tokenSecret, profile, done) {
     provider_id: profile.id,
     provider: profile.provider,
     username: profile.username || profile.displayName,
-    name: { "givenName": nameParts.length ? nameParts[0] : undefined, "familyName": nameParts.length > 1 ? nameParts[1] : undefined},
-    displayName: profile.displayName,
+    name: {
+      first: nameParts.length ? nameParts[0] : undefined,
+      last: nameParts.length > 1 ? nameParts[1] : undefined,
+      full: profile.__json.name
+    },
     email: profile._json.email,
     avatar: profile.photos && profile.photos.length ? profile.photos[0].value : undefined
   };
@@ -46,8 +64,10 @@ app.verifyFacebookUser = function (token, tokenSecret, profile, done) {
     provider_id: profile.id,
     provider: profile.provider,
     username: profile.username || profile.displayName,
-    name: { "givenName": profile._json.first_name, "familyName": profile._json.last_name},
-    displayName: profile.displayName,
+    name: {
+      first: profile.__json.first_name,
+      last: profile.__json.last_name
+    },
     email: profile._json.email,
     avatar: 'https://graph.facebook.com/' + profile.id + '/picture'
   };

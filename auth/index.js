@@ -47,3 +47,7 @@ app.auth.logOut = function (req, cb) {
   req.logOut();
   app.auth.killSession(user, cb);
 };
+
+app.hook('model:afterDestroy:users').add(function (user, done) {
+  app.auth.killSession(user, done);
+});

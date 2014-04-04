@@ -53,25 +53,3 @@ app.verifyFacebookUser = function (token, tokenSecret, profile, done) {
   };
   return createOrUpdateProfile(normalizedData, done);
 };
-
-app.verifyFreedomworksUser = function (token, tokenSecret, profile, done) {
-
-  //todo - fit this into our schema, when we choose it
-  var normalizeData = {
-    provider_id: profile._json.uid,
-    provider: profile.provider,
-    username: profile._json.name,
-    name: { "givenName": profile._json.first, "familyName": profile._json.last},
-    displayName: profile._json.profile.title || (profile._json.first + ' ' + profile._json.last),
-    email: profile._json.mail,
-    avatar: profile._json.picture ? 'http://connect.freedomworks.org/' + profile._json.picture :
-      'http://connect.freedomworks.org/picture/' + profile._json.uid + '?size=tiny'
-  };
-  if (profile._json.facebook_id) {
-    normalizeData.facebook_id = profile._json.facebook_id;
-  }
-  if (profile._json.twitter_screen_name) {
-    normalizeData.twitter_screen_name = profile._json.twitter_screen_name;
-  }
-  return createOrUpdateProfile(normalizedData, done);
-};

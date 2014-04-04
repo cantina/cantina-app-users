@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/cantina/cantina-app-users",
   "dependencies": {
-    "cantina-models-mongo": "cantina/cantina-models-mongo#3.1.x",
+    "cantina-models-mongo": "cantina/cantina-models-mongo#3.x",
     "cantina-models-schemas": "cantina/cantina-models-schemas#master"
   },
   "devDependencies": {

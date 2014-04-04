@@ -1,6 +1,5 @@
 describe('Authentication', function () {
   var app
-    , http = require('http')
     , user = {
       id: 'erin'
     };
@@ -10,9 +9,9 @@ describe('Authentication', function () {
     app.boot(function (err) {
       if (err) return done(err);
 
-      require('../');
-      require('cantina-web');
+      app.conf.set('mongo:db', 'cantina-app-users-test-' + idgen());
       app.silence();
+      require('../');
 
       app.start(function (err) {
         if (err) return done(err);
@@ -42,30 +41,32 @@ describe('Authentication', function () {
     });
   });
 
+  after(function (done) {
+    app.destroy(done);
+  });
+
   it('should create a session upon login', function (done) {
-    http.get('http://localhost:3000/test-login', function () {
+    request('http://localhost:3000/test-login', function (err) {
+      assert.ifError(err);
       var key = app.redisKey('sessions', user.id);
       app.redis.SMEMBERS(key, function (err, members) {
         assert.ifError(err);
         assert(members.length);
         done();
       });
-    }).on('error', function (err) {
-      assert.ifError(err);
     });
   });
 
   it('should delete all sessions upon logout', function (done) {
-    http.get('http://localhost:3000/test-logout', function () {
+    request.get('http://localhost:3000/test-logout', function (err) {
+      assert.ifError(err);
       var key = app.redisKey('sessions', user.id);
       app.redis.SMEMBERS(key, function (err, members) {
         assert.ifError(err);
         assert(!members.length);
         done();
       });
-    }).on('error', function (err) {
-        assert.ifError(err);
-      });
+    })
   })
 
 });

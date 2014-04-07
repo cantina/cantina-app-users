@@ -61,6 +61,31 @@ app.hook('model:destroy:user', function (user, next) {
 API Reference
 -------------
 
+### `app.users`
+
+Namespace for user API
+
+#### `app.users.findByAuth( email, password, cb )`
+
+Load user with matching email from the database and verifies password. Returns
+a sanitized user model, if match is found.
+
+#### `app.users.authenticate( email, password, req, res, next)`
+
+Loads the user via `findByAuth` and invokes `req.logIn`.
+
+#### `app.users.setPassword( user, password )`
+
+Sets the auth property on the user model to be a `bcrypt` hash of the password
+
+#### `app.users.checkPassword( user, password )`
+
+Checks the password against the user's auth property using `bcrypt.compare`
+
+#### `app.users.sanitize( user )`
+
+Modifies and returns the user model without the auth property
+
 ### `app.auth`
 
 Namespace for authentication-related API

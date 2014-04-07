@@ -10,6 +10,7 @@ describe('Authentication', function () {
 
       app.conf.set('mongo:db', 'cantina-app-users-test-' + idgen());
       app.conf.set('redis:prefix', 'cantina-app-users-test-' + idgen());
+      app.conf.set('auth-twitter', {});
       require('../');
 
       app.start(function (err) {
@@ -138,6 +139,12 @@ describe('Authentication', function () {
         done();
       });
     })
+  });
+
+  it('extends the user schema for third party auths', function (done) {
+    assert(app.schemas.user.indexes.mongo.length === 3);
+    assert(app.schemas.user.properties.provider);
+    done();
   })
 
 });

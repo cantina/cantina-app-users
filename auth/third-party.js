@@ -1,18 +1,20 @@
 var app = require('cantina');
 
 if (app.conf.get('auth-twitter') || app.conf.get('auth-facebook')) {
-  app.users.schema = app.schemas.extend(app.users.schema, {
+  app.Schema.extend(app.schemas.user, {
     properties: {
-      provider_id: {
-        type: 'string'
-      },
       provider: {
-        type: 'string'
+        id: {
+          type: 'string'
+        },
+        name: {
+          type: 'string'
+        }
       }
     }
   });
 
-  app.users.schema._indexes.push({provider_id: 1});
+  app.schemas.user.indexes.mongo.push({'provider.id': 1, 'provider.name': 1});
 }
 
 function createOrUpdateProfile (data, done) {
@@ -20,7 +22,7 @@ function createOrUpdateProfile (data, done) {
   // Verify user data, then load/save the user model.
   if (data && data.provider_id) {
 
-    app.collections.users.find({provider_id: data.id}, function(err, user) {
+    app.collections.users.find({'provider.id': data.provider_id, 'provider.name': data.provider}, function(err, user) {
       if (err) return done(err);
       if (user) {
         // Update local user data from upstream
@@ -40,7 +42,6 @@ function createOrUpdateProfile (data, done) {
 
 app.verifyTwitterUser = function (token, tokenSecret, profile, done) {
 
-  //todo - fit this into our schema, when we choose it
   var nameParts = profile._json.name.split(' ');
   var normalizedData = {
     provider_id: profile.id,
@@ -59,7 +60,6 @@ app.verifyTwitterUser = function (token, tokenSecret, profile, done) {
 
 app.verifyFacebookUser = function (token, tokenSecret, profile, done) {
 
-  //todo - fit this into our schema, when we choose it
   var normalizedData = {
     provider_id: profile.id,
     provider: profile.provider,

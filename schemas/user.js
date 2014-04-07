@@ -3,11 +3,13 @@ var app = require('cantina');
 require('cantina-validators');
 
 module.exports = {
-  _name: 'users',
-  _indexes: [
-    { email_lc: 1 },
-    { 'name.sortable': 1 }
-  ],
+  name: 'user',
+  indexes: {
+    mongo: [
+      { email_lc: 1 },
+      { 'name.sortable': 1 }
+    ]
+  },
   properties: {
     id: {
       type: 'string',

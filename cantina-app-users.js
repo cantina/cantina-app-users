@@ -1,21 +1,17 @@
-var app = require('cantina')
-  , defaultUserSchema = require('./default-user-schema');
+var app = require('cantina');
 
 require('cantina-models-mongo');
 require('cantina-models-schemas');
 
-app.users = {
-  // The app can override or extend the schema
-  schema: defaultUserSchema
-};
+app.loadSchemas('schemas');
 
 app.once('collection:create:users', function (collection) {
-  collection.ensureIndex(app.users.schema._indexes, function (err) {
+  collection.ensureIndex(app.schemas.user.indexes.mongo, function (err) {
     if (err) app.emit('error', err);
   });
 });
 
 app.hook('start').add(function (done) {
-  app.createMongoCollection('users', app.schemas.getCollectionOptions(app.users.schema));
+  app.createMongoCollection('users', app.schemas.user.getOptions());
   done();
 });

@@ -1,7 +1,21 @@
 describe('basic', function (){
 
   var app
-    , obj = { first_name: 'Jean-Luc', last_name: 'Picard', id: idgen() };
+    , obj = { name: { first: 'Jean-Luc', last: 'Picard' }, username: 'captain', email: 'jlp@enterprise.com', id: idgen() };
+
+  function assertModel (actual, expected) {
+    Object.keys(expected).forEach(function (prop) {
+      if (prop === '_id') {
+        assert.ok(expected[prop].equal(actual[prop]));
+      }
+      else if (expected[prop] === Object(expected[prop])) {
+        assert.deepEqual(actual[prop], expected[prop]);
+      }
+      else {
+        assert.strictEqual(actual[prop], expected[prop]);
+      }
+    });
+  }
 
   before(function (done) {
     app = require('cantina');
@@ -28,9 +42,7 @@ describe('basic', function (){
     app.collections.users.create(obj, function (err, user) {
       assert.ifError(err);
       assert(user);
-      for (var k in obj) {
-        assert.strictEqual(user[k], obj[k]);
-      }
+      assertModel(user, obj);
       done();
     });
   });
@@ -51,9 +63,7 @@ describe('basic', function (){
       assert.ifError(err);
       assert(results);
       assert.equal(results.length, 1);
-      for (var k in obj) {
-        assert.strictEqual(results[0][k], obj[k]);
-      }
+      assertModel(results[0], obj);
       done();
     });
   });

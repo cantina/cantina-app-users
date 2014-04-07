@@ -21,7 +21,8 @@
     "cantina-models-mongo": "cantina/cantina-models-mongo#3.x",
     "cantina-models-schemas": "cantina/cantina-models-schemas#master",
     "async": "~0.2.10",
-    "underscore": "~1.6.0"
+    "underscore": "~1.6.0",
+    "bcrypt": "~0.7.7"
   },
   "devDependencies": {
     "cantina": "cantina/cantina#3.x",

@@ -1,8 +1,7 @@
 describe('Authentication', function () {
   var app
-    , user = {
-      id: 'erin'
-    };
+    , user
+    , pass = 'admin';
 
   before(function (done) {
     app = require('cantina');
@@ -10,56 +9,124 @@ describe('Authentication', function () {
       if (err) return done(err);
 
       app.conf.set('mongo:db', 'cantina-app-users-test-' + idgen());
-      app.silence();
+      app.conf.set('redis:prefix', 'cantina-app-users-test-' + idgen());
       require('../');
 
       app.start(function (err) {
         if (err) return done(err);
         var controller = app.controller();
 
-        controller.get('/test-login', function (req, res) {
-          res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
-          app.auth.logIn(user, req, res, function (err) {
-            assert.ifError(err);
-            assert(req.isAuthenticated());
-            res.end('<body>Welcome!</body>');
+        controller.get('/test-login', function (req, res, next) {
+          app.users.authenticate(req.query.email, req.query.pass, req, res, function (err) {
+            if (err) {
+              console.log(err);
+              res.renderStatus(500);
+            }
+            if (req.isAuthenticated()) {
+              res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
+              res.end('<body>Welcome!</body>');
+            }
+            else {
+              console.log('Error: not authenticated');
+              res.renderStatus(403);
+            }
           });
         });
         controller.get('/test-logout', function (req, res) {
-          res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
-          req.user = user;
+          req.user || (req.user = user);
           app.auth.logOut(req, function (err) {
-            assert.ifError(err);
-            assert(!req.isAuthenticated());
-            res.end('<body>Goodbye!</body>');
+            if (err) {
+              console.log(err);
+              res.renderStatus(500);
+            }
+            if (!req.isAuthenticated()) {
+              res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
+              res.end('<body>Goodbye!</body>');
+            }
+            else {
+              console.log('Error: still authenticated');
+              res.renderStatus(403);
+            }
           });
         });
-
         app.middleware.add(controller);
         done();
       });
     });
   });
 
-  after(function (done) {
-    app.destroy(done);
+  before(function (done) {
+    app.collections.users.ensureIndex({email_lc: 1}, done);
   });
 
-  it('should create a session upon login', function (done) {
-    request('http://localhost:3000/test-login', function (err) {
+  before(function (done) {
+    user = app.collections.users.create({
+      email_lc: 'dev@terraeclipse.com'
+    });
+    done();
+  });
+
+  after(function (done) {
+    app.mongo.dropDatabase(function () {
+      app.destroy(done);
+    });
+  });
+
+  it('should be able to set a user\'s password', function (done) {
+    app.users.setPassword(user, pass);
+    assert(user.auth);
+    app.collections.users.save(user, function (err) {
       assert.ifError(err);
-      var key = app.redisKey('sessions', user.id);
-      app.redis.SMEMBERS(key, function (err, members) {
-        assert.ifError(err);
-        assert(members.length);
-        done();
-      });
+      done();
+    })
+  });
+
+  it('should be able to check a user\'s password', function (done) {
+    var valid = app.users.checkPassword(user, pass);
+    assert(valid);
+    var invalid = app.users.checkPassword(user, 'foo');
+    assert(!invalid);
+    done();
+  });
+
+  it('should be able to load a user by email/pass', function (done) {
+    app.users.findByAuth(user.email_lc, pass, function (err, foundUser) {
+      assert.ifError(err);
+      assert(foundUser);
+      assert.equal(foundUser.id, user.id);
+      assert(!foundUser.auth);
+      done();
+    });
+  });
+
+  it('should be able to sanitize a user model', function (done) {
+    assert(user.auth);
+    app.users.sanitize(user);
+    assert(!user.auth);
+    done();
+  });
+
+  it('should be able to authenticate a user', function (done) {
+    request('http://localhost:3000/test-login?email=' + user.email_lc + '&pass=' + pass,  function (error, response) {
+      assert.ifError(error);
+      assert.equal(response.statusCode, 200);
+      done();
+    });
+  })
+
+  it('should create a session upon login', function (done) {
+    var key = app.redisKey('sessions', user.id);
+    app.redis.SMEMBERS(key, function (err, members) {
+      assert.ifError(err);
+      assert(members.length);
+      done();
     });
   });
 
   it('should delete all sessions upon logout', function (done) {
-    request.get('http://localhost:3000/test-logout', function (err) {
-      assert.ifError(err);
+    request.get('http://localhost:3000/test-logout',  function (error, response) {
+      assert.ifError(error);
+      assert.equal(response.statusCode, 200);
       var key = app.redisKey('sessions', user.id);
       app.redis.SMEMBERS(key, function (err, members) {
         assert.ifError(err);

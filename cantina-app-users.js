@@ -1,4 +1,5 @@
-var app = require('cantina');
+var app = require('cantina')
+  , bcrypt = require('bcrypt');
 
 require('cantina-models-mongo');
 require('cantina-models-schemas');
@@ -16,3 +17,44 @@ app.hook('start').add(function (done) {
   }));
   done();
 });
+
+
+app.users = {
+
+  findByAuth: function (email, pass, cb) {
+    app.collections.users.findOne({email_lc: email}, function (err, user) {
+      if (err) return cb(err);
+      if (user && app.users.checkPassword(user, pass)) {
+        return cb(null, app.users.sanitize(user));
+      }
+      else {
+        cb();
+      }
+    });
+  },
+
+  authenticate: function (email, pass, req, res, next) {
+    app.users.findByAuth(email, pass, function (err, user) {
+      if (err) return next(err);
+      if (user) {
+        return app.auth.logIn(user, req, res, next);
+      }
+      else {
+        return next(new Error('Invalid email/password combination'));
+      }
+    });
+  },
+
+  setPassword: function (user, newPass) {
+    user.auth = bcrypt.hashSync(newPass, 12);
+  },
+
+  checkPassword: function (user, pass) {
+    return bcrypt.compareSync(pass, user.auth);
+  },
+
+  sanitize: function (user) {
+    delete user.auth;
+    return user;
+  }
+};

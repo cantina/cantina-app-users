@@ -74,11 +74,11 @@ a sanitized user model, if match is found.
 
 Loads the user via `findByAuth` and invokes `req.logIn`.
 
-#### `app.users.setPassword( user, password )`
+#### `app.users.setPassword( user, password, cb )`
 
 Sets the auth property on the user model to be a `bcrypt` hash of the password
 
-#### `app.users.checkPassword( user, password )`
+#### `app.users.checkPassword( user, password, cb )`
 
 Checks the password against the user's auth property using `bcrypt.compare`
 

@@ -24,8 +24,16 @@ app.users = {
   findByAuth: function (email, pass, cb) {
     app.collections.users.findOne({email_lc: email}, function (err, user) {
       if (err) return cb(err);
-      if (user && app.users.checkPassword(user, pass)) {
-        return cb(null, app.users.sanitize(user));
+      if (user) {
+        app.users.checkPassword(user, pass, function (err, valid) {
+          if (err) return cb(err);
+          if (valid) {
+            return cb(null, app.users.sanitize(user));
+          }
+          else {
+            cb();
+          }
+        });
       }
       else {
         cb();
@@ -45,12 +53,16 @@ app.users = {
     });
   },
 
-  setPassword: function (user, newPass) {
-    user.auth = bcrypt.hashSync(newPass, 12);
+  setPassword: function (user, newPass, cb) {
+    bcrypt.hash(newPass, 12, function (err, hash) {
+      if (err) return cb(err);
+      user.auth = hash;
+      cb(null, hash);
+    });
   },
 
-  checkPassword: function (user, pass) {
-    return bcrypt.compareSync(pass, user.auth);
+  checkPassword: function (user, pass, cb) {
+    bcrypt.compare(pass, user.auth, cb);
   },
 
   sanitize: function (user) {

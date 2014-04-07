@@ -73,20 +73,26 @@ describe('Authentication', function () {
   });
 
   it('should be able to set a user\'s password', function (done) {
-    app.users.setPassword(user, pass);
-    assert(user.auth);
-    app.collections.users.save(user, function (err) {
+    app.users.setPassword(user, pass, function (err) {
       assert.ifError(err);
-      done();
-    })
+      assert(user.auth);
+      app.collections.users.save(user, function (err) {
+        assert.ifError(err);
+        done();
+      })
+    });
   });
 
   it('should be able to check a user\'s password', function (done) {
-    var valid = app.users.checkPassword(user, pass);
-    assert(valid);
-    var invalid = app.users.checkPassword(user, 'foo');
-    assert(!invalid);
-    done();
+    app.users.checkPassword(user, pass, function (err, valid) {
+      assert.ifError(err);
+      assert(valid);
+      app.users.checkPassword(user, 'foo', function (err, invalid) {
+        assert.ifError(err);
+        assert(!invalid);
+        done();
+      });
+    });
   });
 
   it('should be able to load a user by email/pass', function (done) {

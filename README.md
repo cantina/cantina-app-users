@@ -29,20 +29,25 @@ cantina-auth, as well as session management.
 var app = require('cantina')
   , controller = module.exports = app.controller();
 
-controller.get('/login', function (req, res, next) {
-  /*
-   * Parse the login request.
-   * Load and verify the user
-   */
+controller.post('/login', function (req, res, next) {
+  if (!req.body) {
+      return next(new Error('Invalid post data'));
+    }
+    if (!req.body.email || !req.body.pass) {
+      res.formError('login', 'Email and password are both required.');
+      return next();
+    }
 
-   var user;
-   app.auth.logIn(user, req, res, function (err) {
-    if (err) return res.renderError(err);
-     res.render('home');
-   });
+    app.users.authenticate(req.body.email.trim(), req.body.pass, req, res, function (err) {
+      if (err) {
+        res.formError('login', err.message);
+        return next();
+      }
+      res.redirect('/');
+    });
 }
 
-controller.get('/logout', function (req, res, next) {
+controller.post('/logout', function (req, res, next) {
   app.auth.logOut(req, function (err) {
     if (err) return res.renderError(err);
     res.redirect('/login');

@@ -56,12 +56,10 @@ describe('Authentication', function () {
   });
 
   before(function (done) {
-    app.collections.users.ensureIndex({email_lc: 1}, done);
-  });
-
-  before(function (done) {
     user = app.collections.users.create({
-      email_lc: 'dev@terraeclipse.com'
+      email: 'dev@TerraEclipse.com',
+      email_lc: 'dev@terraeclipse.com',
+      username: 'admin'
     });
     done();
   });

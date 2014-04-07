@@ -130,3 +130,13 @@ property.
 
 Implements user deserialization for cantina-auth. Loads and returns the user
 with matching `id` in `app.collections.user`.
+
+### `app.verifyTwitterUser(token, tokenSecret, profile, done)`
+
+Implements account verification for cantina-auth-twitter. Creates or updates
+the existing user account with matching `email`on `app.collections.user`.
+
+### `app.verifyFacebookUser(token, tokenSecret, profile, done)`
+
+Implements account verification for cantina-auth-facebook. Creates or updates
+the existing user account with matching `email`on `app.collections.user`.

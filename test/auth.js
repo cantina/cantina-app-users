@@ -142,7 +142,6 @@ describe('Authentication', function () {
   });
 
   it('extends the user schema for third party auths', function (done) {
-    assert(app.schemas.user.indexes.mongo.length === 3);
     assert(app.schemas.user.properties.provider);
     done();
   })

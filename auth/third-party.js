@@ -13,8 +13,6 @@ if (app.conf.get('auth-twitter') || app.conf.get('auth-facebook')) {
       }
     }
   });
-
-  app.schemas.user.indexes.mongo.push({'provider.id': 1, 'provider.name': 1});
 }
 
 function createOrUpdateProfile (data, done) {
@@ -22,11 +20,11 @@ function createOrUpdateProfile (data, done) {
   // Verify user data, then load/save the user model.
   if (data && data.provider_id) {
 
-    app.collections.users.find({'provider.id': data.provider_id, 'provider.name': data.provider}, function(err, user) {
+    app.collections.users.find({'email_lc': data.email.toLowerCase()}, function(err, user) {
       if (err) return done(err);
       if (user) {
         // Update local user data from upstream
-        user = _.extend(user, data);
+        user = _.defaults(user, data);
         app.collections.user.save(user, done);
       }
       else {
@@ -44,8 +42,10 @@ app.verifyTwitterUser = function (token, tokenSecret, profile, done) {
 
   var nameParts = profile._json.name.split(' ');
   var normalizedData = {
-    provider_id: profile.id,
-    provider: profile.provider,
+    provider: {
+      id: profile.id,
+      name: profile.provider
+    },
     username: profile.username || profile.displayName,
     name: {
       first: nameParts.length ? nameParts[0] : undefined,

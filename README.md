@@ -10,6 +10,8 @@ Table of Contents
 - [Usage](#usage)
 - [Authentication](#authentication)
   - [Example](#example)
+- [Email API](#email-api)
+  - [Example](#example)
 - [API Reference](#api-reference)
   - [`app.users`](#appusers)
     - [`app.users.findByAuth(email, password, cb)`](#appusersfindbyauthemail-password-cb)
@@ -140,3 +142,46 @@ the existing user account with matching `email`on `app.collections.user`.
 
 Implements account verification for cantina-auth-facebook. Creates or updates
 the existing user account with matching `email`on `app.collections.user`.
+
+
+Email API
+--------------
+
+Provides templates and hooks for emails user account related emails.
+
+### Templates
+Provides defaults for:
+  - **users/account_confirm**
+  - **users/email_confirm**
+  - **users/account_invitation**
+  - **users/password_reset**
+
+Your application may override any of these by providing its own template
+with the same name.
+
+### Hooks
+Adds a hook to `email:send:before` for the email templates above.
+The hook will perform the following:
+  - Generate an expiring token
+    - `prefix`: Defaults to `"password-reset"` for `users/password_reset`
+    template, `"account"` for all others. Your application may override this
+    by setting `vars.preset` in the `app.email.send` vars.
+    - `expire`:  Defaults to 24 hours for `users/password_reset` template,
+    7 days for all others. Your application may override this by setting
+    `vars.expire` in the `app.email.send` vars.
+  - Add `vars.site`
+    - The result of `app.conf.get('site')`.
+    - Required for the default email templates:
+      - `site.title`
+      - `site.email`
+    - Your application may override this by setting `vars.site` in the
+    `app.email.send` vars.
+  - Add `vars.url`
+    - A url build of the conf's `site.protocol`, `site.domain`, and a pathname
+    appended with the generated token. The pathnames are:
+      - `/password-reset/{token}`
+      - `/account-confirm/{token}`
+      - `/email-confirm/{token}`
+      - `/account-invitation/{token}`
+    Your application may override this by setting `vars.url` in the
+    `app.email.send` vars.

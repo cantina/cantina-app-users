@@ -3,7 +3,7 @@ var app = require('cantina');
 require('cantina-models-mongo');
 require('cantina-models-schemas');
 
-app.loadSchemas('schemas');
+app.loadSchemas('schemas', __dirname);
 
 app.once('collection:create:users', function (collection) {
   collection.ensureIndex(app.schemas.user.indexes.mongo, function (err) {

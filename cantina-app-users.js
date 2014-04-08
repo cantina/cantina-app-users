@@ -54,7 +54,8 @@ app.users = {
   },
 
   setPassword: function (user, newPass, cb) {
-    bcrypt.hash(newPass, 12, function (err, hash) {
+    var rounds = app.conf.get('auth:rounds') || 12;
+    bcrypt.hash(newPass, rounds, function (err, hash) {
       if (err) return cb(err);
       user.auth = hash;
       cb(null, hash);

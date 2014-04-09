@@ -20,9 +20,10 @@ describe('basic', function (){
   before(function (done) {
     app = require('cantina');
     app.boot(function(err) {
+      if (err) return done(err);
       app.conf.set('mongo:db', 'cantina-app-users-test-' + idgen());
       require('../');
-      if (err) return done(err);
+      app.silence();
       app.start(done);
     });
   });
@@ -48,18 +49,18 @@ describe('basic', function (){
   });
 
   it('supports native findOne', function (done) {
-    app.collections.users.findOne({ first_name: obj.first_name }, { last_name: 0 }, function (err, entity) {
+    app.collections.users.findOne({ 'name.first': obj.name.first }, { 'name.last': 0 }, function (err, entity) {
       assert.ifError(err);
       assert(entity);
       assert.strictEqual(entity.id, obj.id);
-      assert.strictEqual(entity.first_name, obj.first_name);
-      assert.strictEqual(entity.last_name, undefined);
+      assert.strictEqual(entity.name.first, obj.name.first);
+      assert.strictEqual(entity.name.last, undefined);
       done();
     });
   });
 
   it('supports native find', function (done) {
-    app.collections.users.find().toArray(function (err, results) {
+    app.collections.users.find({ 'name.first': obj.name.first }).toArray(function (err, results) {
       assert.ifError(err);
       assert(results);
       assert.equal(results.length, 1);

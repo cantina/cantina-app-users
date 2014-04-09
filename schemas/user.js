@@ -99,7 +99,7 @@ module.exports = {
     status: {
       type: 'string',
       required: true,
-      validators: [app.validators.matches(/^(?:active|disabled|requested|invited)$/)],
+      validators: [app.validators.matches(/^(?:active|disabled|requested|invited|unconfirmed)$/)],
       default: 'active'
     }
   }

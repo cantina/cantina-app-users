@@ -77,8 +77,14 @@ describe('basic', function (){
       assert(user);
       assert.strictEqual(user.email, defaultAdmin.email);
       assert.strictEqual(user.username, defaultAdmin.username);
-      assert.deepEqual(user.name, defaultAdmin.name);
+      assert.deepEqual(user.name,
+        { first: defaultAdmin.name.first,
+          last: defaultAdmin.name.last,
+          full: defaultAdmin.name.first + ' ' + defaultAdmin.name.last,
+          sortable: defaultAdmin.name.last + ', ' + defaultAdmin.name.first });
       done();
     });
   });
+
+  it('cannot create a second user with the same email address');
 });

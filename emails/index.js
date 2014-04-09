@@ -24,7 +24,7 @@ app.hook('email:send:before').add(function (name, vars, cb) {
       vars.url = vars.url || url.format({
         protocol: site.protocol,
         host: site.domain,
-        pathname: '/password-reset/' + token
+        pathname: '/forgot/' + token
       });
       vars.site || (vars.site = site);
       cb();

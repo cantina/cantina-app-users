@@ -11,7 +11,8 @@ Table of Contents
 - [Authentication](#authentication)
   - [Example](#example)
 - [Email API](#email-api)
-  - [Example](#example)
+  - [Templates](#templates)
+  - [Hooks](#hooks)
 - [API Reference](#api-reference)
   - [`app.users`](#appusers)
     - [`app.users.findByAuth(email, password, cb)`](#appusersfindbyauthemail-password-cb)
@@ -179,7 +180,7 @@ The hook will perform the following:
   - Add `vars.url`
     - A url build of the conf's `site.protocol`, `site.domain`, and a pathname
     appended with the generated token. The pathnames are:
-      - `/password-reset/{token}`
+      - `/forgot/{token}`
       - `/account-confirm/{token}`
       - `/email-confirm/{token}`
       - `/account-invitation/{token}`

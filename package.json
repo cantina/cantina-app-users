@@ -18,11 +18,11 @@
   },
   "homepage": "https://github.com/cantina/cantina-app-users",
   "dependencies": {
+    "async": "^0.2.10",
+    "bcrypt": "~0.7.7",
     "cantina-models-mongo": "cantina/cantina-models-mongo#3.x",
     "cantina-models-schemas": "cantina/cantina-models-schemas#master",
-    "async": "~0.2.10",
-    "underscore": "~1.6.0",
-    "bcrypt": "~0.7.7"
+    "underscore": "~1.6.0"
   },
   "devDependencies": {
     "cantina": "cantina/cantina#3.x",

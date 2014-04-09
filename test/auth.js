@@ -1,7 +1,7 @@
 describe('authentication', function () {
   var app
     , user
-    , pass = 'admin';
+    , pass = 'password';
 
   before(function (done) {
     app = require('cantina');
@@ -56,13 +56,11 @@ describe('authentication', function () {
     });
   });
 
-  before(function (done) {
+  before(function () {
     user = app.collections.users.create({
-      email: 'dev@TerraEclipse.com',
-      email_lc: 'dev@terraeclipse.com',
-      username: 'admin'
+      email: 'noone@TerraEclipse.com',
+      username: 'noone'
     });
-    done();
   });
 
   after(function (done) {

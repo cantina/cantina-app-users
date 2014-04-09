@@ -6,7 +6,8 @@ module.exports = {
   name: 'user',
   indexes: {
     mongo: [
-      { email_lc: 1 },
+      [ { email_lc: 1 }, { unique: true } ],
+      [ { username_lc: 1 }, { unique: true } ],
       { 'name.sortable': 1 }
     ]
   },
@@ -27,6 +28,13 @@ module.exports = {
       type: 'string',
       required: true,
       validators: [app.validators.matches(/^[a-zA-Z0-9_]{3,32}$/)]
+    },
+    username_lc: {
+      type: 'string',
+      private: true,
+      prepare: function (model) {
+        return model.username.toLowerCase();
+      }
     },
     email: {
       type: 'string',
@@ -65,25 +73,21 @@ module.exports = {
         type: 'string',
         prepare: function (model) {
           var name = [];
-          if (model.last_name) name.push(model.last_name);
-          if (model.first_name) name.push(model.first_name);
-          if (name.length === 2) {
-            return name.join(' ');
+          if (model.name) {
+            if (model.name.first) name.push(model.name.first);
+            if (model.name.last) name.push(model.name.last);
           }
-          else if (name.length === 1) {
-            return name[0];
-          }
-          else {
-            return '';
-          }
+          return name.join(' ');
         }
       },
       sortable: {
         type: 'string',
         prepare: function (model) {
           var name = [];
-          if (model.last_name) name.push(model.last_name);
-          if (model.first_name) name.push(model.first_name);
+          if (model.name) {
+            if (model.name.last) name.push(model.name.last);
+            if (model.name.first) name.push(model.name.first);
+          }
           if (name.length === 2) {
             return name.join(', ');
           }

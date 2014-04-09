@@ -68,4 +68,49 @@ describe('basic', function (){
       done();
     });
   });
+
+  it('creates the default admin user', function (done) {
+    var defaultAdmin = app.conf.get('app:users:admin:attributes');
+    assert.equal(defaultAdmin.email, 'dev@terraeclipse.com'); // just to be sure
+    app.collections.users.findOne({ email: defaultAdmin.email }, function (err, user) {
+      assert.ifError(err);
+      assert(user);
+      assert.strictEqual(user.email, defaultAdmin.email);
+      assert.strictEqual(user.username, defaultAdmin.username);
+      assert.deepEqual(user.name,
+        { first: defaultAdmin.name.first,
+          last: defaultAdmin.name.last,
+          full: defaultAdmin.name.first + ' ' + defaultAdmin.name.last,
+          sortable: defaultAdmin.name.last + ', ' + defaultAdmin.name.first });
+      done();
+    });
+  });
+
+  it('cannot create a second user with the same email address', function (done) {
+    var dupe = {
+      name: obj.name,
+      email: obj.email,
+      username: obj.username + '2'
+    };
+    app.collections.users.create(dupe, function (err) {
+      assert(err);
+      assert.equal(err.name, 'MongoError', err.message);
+      assert(err.message.match(/^E11000 duplicate key error index: cantina-app-users-test-[^.]+\.users\.\$email_lc_1 /), 'Unexpected error message: ' + err.message);
+      done();
+    });
+  });
+
+  it('cannot create a second user with the same username', function (done) {
+    var dupe = {
+      name: obj.name,
+      email: 'bill@pullman.name',
+      username: obj.username
+    };
+    app.collections.users.create(dupe, function (err) {
+      assert(err);
+      assert.equal(err.name, 'MongoError', err.message);
+      assert(err.message.match(/^E11000 duplicate key error index: cantina-app-users-test-[^.]+\.users\.\$username_lc_1 /), 'Unexpected error message: ' + err.message);
+      done();
+    });
+  });
 });

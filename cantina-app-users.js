@@ -1,4 +1,5 @@
 var app = require('cantina')
+  , async = require('async')
   , bcrypt = require('bcrypt');
 
 require('cantina-models-mongo');
@@ -38,23 +39,30 @@ app.hook('start').add(function (done) {
      * 2) unless disabled, ensure the default admin user has been created
      */
     init: function (collection) {
-      collection.ensureIndex(app.schemas.user.indexes.mongo, function (err) {
-        if (err) return done(err);
-        if (conf.admin.status === 'disabled') return done();
-        var defaultAdmin = conf.admin.attributes;
-        collection.findOne({ email: defaultAdmin.email }, function (err, user) {
-          if (err) return done(err);
-          if (user) return done();
-          user = collection.create(defaultAdmin);
-          app.users.setPassword(user, user.password, function (err) {
-            if (err) return done(err);
-            delete user.password;
-            collection.save(user, function (err) {
-              done(err);
+      var tasks = [];
+      app.schemas.user.indexes.mongo.forEach(function (idx) {
+        // An index could be an array containing an optional options hash as the second argument
+        tasks.push(function (next) {
+          collection.ensureIndex.apply(collection, (Array.isArray(idx) ? idx : [idx]).concat(next));
+        });
+      });
+      if (conf.admin.status !== 'disabled') {
+        tasks.push(function (next) {
+          var defaultAdmin = conf.admin.attributes;
+          collection.findOne({ email: defaultAdmin.email }, function (err, user) {
+            if (err) return next(err);
+            if (user) return next();
+            user = collection.create(defaultAdmin);
+            app.users.setPassword(user, user.password, function (err) {
+              if (err) return next(err);
+              delete user.password;
+              collection.save(user, next);
             });
           });
         });
-      });
+      }
+      if (tasks.length === 0) done();
+      else async.series(tasks, done);
     }
   }));
 });

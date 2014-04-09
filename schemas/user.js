@@ -6,7 +6,8 @@ module.exports = {
   name: 'user',
   indexes: {
     mongo: [
-      { email_lc: 1 },
+      [ { email_lc: 1 }, { unique: true } ],
+      [ { username_lc: 1 }, { unique: true } ],
       { 'name.sortable': 1 }
     ]
   },
@@ -27,6 +28,13 @@ module.exports = {
       type: 'string',
       required: true,
       validators: [app.validators.matches(/^[a-zA-Z0-9_]{3,32}$/)]
+    },
+    username_lc: {
+      type: 'string',
+      private: true,
+      prepare: function (model) {
+        return model.username.toLowerCase();
+      }
     },
     email: {
       type: 'string',

@@ -86,5 +86,31 @@ describe('basic', function (){
     });
   });
 
-  it('cannot create a second user with the same email address');
+  it('cannot create a second user with the same email address', function (done) {
+    var dupe = {
+      name: obj.name,
+      email: obj.email,
+      username: obj.username + '2'
+    };
+    app.collections.users.create(dupe, function (err) {
+      assert(err);
+      assert.equal(err.name, 'MongoError', err.message);
+      assert(err.message.match(/^E11000 duplicate key error index: cantina-app-users-test-[^.]+\.users\.\$email_lc_1 /), 'Unexpected error message: ' + err.message);
+      done();
+    });
+  });
+
+  it('cannot create a second user with the same username', function (done) {
+    var dupe = {
+      name: obj.name,
+      email: 'bill@pullman.name',
+      username: obj.username
+    };
+    app.collections.users.create(dupe, function (err) {
+      assert(err);
+      assert.equal(err.name, 'MongoError', err.message);
+      assert(err.message.match(/^E11000 duplicate key error index: cantina-app-users-test-[^.]+\.users\.\$username_lc_1 /), 'Unexpected error message: ' + err.message);
+      done();
+    });
+  });
 });

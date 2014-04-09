@@ -54,8 +54,8 @@ describe('emails', function () {
       assert.ifError(err);
       assert(vars.url);
       var parts = url.parse(vars.url);
-      assert(parts.pathname.match(/\/password-reset\//));
-      var token = parts.pathname.replace(/\/password-reset\//, '');
+      assert(parts.pathname.match(/\/forgot\//));
+      var token = parts.pathname.replace(/\/forgot\//, '');
       app.tokens.check(token, 'password-reset', function (err, exists) {
         assert.ifError(err);
         assert(exists);

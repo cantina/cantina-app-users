@@ -70,7 +70,7 @@ describe('basic', function (){
   });
 
   it('creates the default admin user', function (done) {
-    var defaultAdmin = app.conf.get('app-users:admin:attributes');
+    var defaultAdmin = app.conf.get('app:users:admin:attributes');
     assert.equal(defaultAdmin.email, 'dev@terraeclipse.com'); // just to be sure
     app.collections.users.findOne({ email: defaultAdmin.email }, function (err, user) {
       assert.ifError(err);

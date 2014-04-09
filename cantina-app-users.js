@@ -6,22 +6,24 @@ require('cantina-models-schemas');
 
 // Default conf
 app.conf.add({
-  'app-users': {
-    admin: {
-      status: 'enabled',
-      attributes: {
-        name: {
-          first: 'Web',
-          last:  'Team'
-        },
-        username: 'admin',
-        email: 'dev@terraeclipse.com',
-        password: 'admin'
+  app: {
+    users: {
+      admin: {
+        status: 'enabled',
+        attributes: {
+          name: {
+            first: 'Web',
+            last:  'Team'
+          },
+          username: 'admin',
+          email: 'dev@terraeclipse.com',
+          password: 'admin'
+        }
       }
     }
   }
 });
-var conf = app.conf.get('app-users');
+var conf = app.conf.get('app:users');
 
 app.loadSchemas('schemas', __dirname);
 require('./auth');

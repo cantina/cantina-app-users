@@ -1,4 +1,5 @@
-var app = require('cantina');
+var app = require('cantina')
+  , idgen = require('idgen');
 
 require('cantina-validators');
 
@@ -27,12 +28,27 @@ module.exports = {
     username: {
       type: 'string',
       required: true,
-      validators: [app.validators.matches(/^[a-zA-Z0-9_]{3,32}$/)]
+      validators: [app.validators.matches(/^[a-zA-Z0-9_]{3,32}$/)],
+      prepare: function (model) {
+        if (model.username) {
+          return model.username;
+        }
+        var username = [];
+        if (model.name) {
+          if (model.name.first) username.push(model.name.first);
+          if (model.name.last) username.push(model.name.last);
+        }
+        username = username.join('').replace(/[^a-zA-Z0-9_]/g, '').substring(0, 32 - 7) + '_' + idgen(6);
+        return username;
+      }
     },
     username_lc: {
       type: 'string',
       private: true,
       prepare: function (model) {
+        if (!model.username) {
+          model.username = app.schemas.user.properties.username.prepare(model);
+        }
         return model.username.toLowerCase();
       }
     },

@@ -113,4 +113,16 @@ describe('basic', function (){
       done();
     });
   });
+
+  it('can set a default username', function (done) {
+    var user = {
+      name: obj.name,
+      email: 'bill@pullman.name'
+    };
+    app.collections.users.create(user, function (err, savedUser) {
+      assert.ifError(err);
+      assert(savedUser.username);
+      done();
+    });
+  })
 });

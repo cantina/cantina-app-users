@@ -1,9 +1,9 @@
 ---
-to: '{{{user.name}}} <{{user.email}}>'
+to: '{{{user.name.full}}} <{{user.email}}>'
 from: '{{{site.title}}} <{{site.email}}>'
 subject: 'Confirm your email address at {{{site.title}}}'
 ---
-Greetings {{{user.name}}},
+Greetings {{{user.name.full}}},
 
 Your email address on {{{site.title}}} has recently changed.
 

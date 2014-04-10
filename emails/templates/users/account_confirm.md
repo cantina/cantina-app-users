@@ -1,9 +1,9 @@
 ---
-to: '{{{user.name}}} <{{user.email}}>'
+to: '{{{user.name.full}}} <{{user.email}}>'
 from: '{{{site.title}}} <{{site.email}}>'
 subject: 'Complete your account at {{{site.title}}}'
 ---
-Greetings {{{user.name}}}!
+Greetings {{{user.name.full}}}!
 
 Welcome to {{{site.title}}}!
 

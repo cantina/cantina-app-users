@@ -20,6 +20,9 @@ app.conf.add({
           email: 'dev@terraeclipse.com',
           password: 'admin'
         }
+      },
+      authenticate: {
+        status: ['active']
       }
     }
   }
@@ -76,7 +79,7 @@ app.users = {
       if (user) {
         app.users.checkPassword(user, pass, function (err, valid) {
           if (err) return cb(err);
-          if (valid) {
+          if (valid && conf.authenticate.status.indexOf(user.status) >= 0) {
             return cb(null, app.users.sanitize(user));
           }
           else {

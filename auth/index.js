@@ -51,3 +51,12 @@ app.auth.logOut = function (req, cb) {
 app.hook('model:afterDestroy:users').add(function (user, done) {
   app.auth.killSession(user, done);
 });
+
+app.hook('model:afterSave:users').add(function (user, done) {
+  if (app.conf.get('app:users:authenticate:status').indexOf(user.status) < 0) {
+    app.auth.killSession(user, done);
+  }
+  else {
+    done();
+  }
+});

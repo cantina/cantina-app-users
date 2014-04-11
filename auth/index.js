@@ -53,7 +53,7 @@ app.hook('model:afterDestroy:users').add(function (user, done) {
 });
 
 app.hook('model:afterSave:users').add(function (user, done) {
-  if (app.conf.get('app:users:authenticate:status').indexOf(user.status) < 0) {
+  if (app.conf.get('app:users:authenticate:allowedStatus').indexOf(user.status) < 0) {
     app.auth.killSession(user, done);
   }
   else {

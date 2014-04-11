@@ -8,9 +8,15 @@ user model, and authentication.
 Table of Contents
 -----------------
 - [Usage](#usage)
+- [Default Schema](#default-schema)
+  - [Extending](#extending)
+- [Default Admin User](#default-admin-user)
+  - [Configuring](#configuring)
+- [Schemas](#schemas)
+  - [Provides](#provides)
 - [Authentication](#authentication)
   - [Example](#example)
-- [Email API](#email-api)
+- [Email](#email)
   - [Templates](#templates)
   - [Hooks](#hooks)
 - [API Reference](#api-reference)
@@ -20,17 +26,69 @@ Table of Contents
     - [`app.users.setPassword(user, password, cb)`](#appuserssetpassworduser-password-cb)
     - [`app.users.checkPassword(user, password, cb)`](#appuserscheckpassworduser-password-cb)
     - [`app.users.sanitize(user)`](#appuserssanitizeuser)
+  - [`app.loadSchemas(dir, cwd)`](#apploadschemas-dir-cwd)
   - [`app.auth`](#appauth)
     - [`app.auth.logIn(user, req, res, next)`](#appauthloginuser-req-res-next)
     - [`app.auth.killSession(user, cb)`](#appauthkillsessionuser-cb)
     - [`app.auth.logOut(req, cb)`](#appauthlogoutreq-cb)
   - [`app.serializeUser(user, cb)`](#appserializeuseruser-cb)
   - [`app.deserializeUser(id, cb)`](#appdeserializeuserid-cb)
+  - [`app.verifyTwitterUser(token, tokenSecret, profile, done)`](#appverifytwitteruser-token-tokensecret-profile-done)
+  - [`app.verifyFacebookUser(token, tokenSecret, profile, done)`](#appverifyfacebookuser-token-tokensecret-profile-done)
+  - [`app.email`](#appemail)
+    - [`app.email.send (name, vars, cb)`](#appemailsend-name-vars-cb)
+    - [`app.email.loadTemplates (templateDir, weight)`](#appemailloadtemplates-templatedir-weight)
 
 Usage
 -----
 
 [Generally describe how to use the user system, what parts can be overridden, etc.]
+
+Default Schema
+--------------
+
+Provides the [default user schema](schemas/user.js).
+
+### Extending
+
+```js
+app.Schema.extend(app.schemas.user, {
+  properties: {
+    someprop: {
+    type: 'string',
+    default: '',
+    required: true
+    }
+  }
+});
+```
+
+Default Admin User
+------------------
+
+Provides the default admin user, Web Team <dev@terraeclipse.com>, with password "admin".
+
+### Configuring
+
+```yaml
+# In etc/app/users.yml
+admin:
+  attributes:
+    username: webteam
+    password: ryd9ebyz
+```
+
+Schemas
+-------
+
+Provides schemas for [cantina-models](https://github.com/cantina/cantina-models)
+
+### Provides
+
+- **app.schemas**
+  - Loaded schemas, keyed by name.
+- **app.Schema**
+  - The Schema class. Instances are created from definitions loaded by `app.loadSchemas()`.
 
 Authentication
 --------------
@@ -77,6 +135,48 @@ app.hook('model:destroy:user', function (user, next) {
   app.auth.killSession(user, next);
 });
 ```
+
+Email
+-----
+
+Provides templates and hooks for emails user account related emails.
+
+### Templates
+Provides defaults for:
+  - **users/account_confirm**
+  - **users/email_confirm**
+  - **users/account_invitation**
+  - **users/password_reset**
+
+Your application may override any of these by providing its own template
+with the same name.
+
+### Hooks
+Adds a hook to `email:send:before` for the email templates above.
+The hook will perform the following:
+  - Generate an expiring token
+    - `prefix`: Defaults to `"password-reset"` for `users/password_reset`
+    template, `"account"` for all others. Your application may override this
+    by setting `vars.preset` in the `app.email.send` vars.
+    - `expire`:  Defaults to 24 hours for `users/password_reset` template,
+    7 days for all others. Your application may override this by setting
+    `vars.expire` in the `app.email.send` vars.
+  - Add `vars.site`
+    - The result of `app.conf.get('site')`.
+    - Required for the default email templates:
+      - `site.title`
+      - `site.email`
+    - Your application may override this by setting `vars.site` in the
+    `app.email.send` vars.
+  - Add `vars.url`
+    - A url build of the conf's `site.protocol`, `site.domain`, and a pathname
+    appended with the generated token. The pathnames are:
+      - `/forgot/{token}`
+      - `/account-confirm/{token}`
+      - `/email-confirm/{token}`
+      - `/account-invitation/{token}`
+    Your application may override this by setting `vars.url` in the
+    `app.email.send` vars.
 
 API Reference
 -------------
@@ -144,45 +244,15 @@ the existing user account with matching `email`on `app.collections.user`.
 Implements account verification for cantina-auth-facebook. Creates or updates
 the existing user account with matching `email`on `app.collections.user`.
 
+### `app.email`
 
-Email API
---------------
+Namespace for email API
 
-Provides templates and hooks for emails user account related emails.
+#### `app.email.send (name, vars, cb)`
 
-### Templates
-Provides defaults for:
-  - **users/account_confirm**
-  - **users/email_confirm**
-  - **users/account_invitation**
-  - **users/password_reset**
+Send an email using a named template.
 
-Your application may override any of these by providing its own template
-with the same name.
+#### `app.email.loadTemplates (templateDir, weight)`
 
-### Hooks
-Adds a hook to `email:send:before` for the email templates above.
-The hook will perform the following:
-  - Generate an expiring token
-    - `prefix`: Defaults to `"password-reset"` for `users/password_reset`
-    template, `"account"` for all others. Your application may override this
-    by setting `vars.preset` in the `app.email.send` vars.
-    - `expire`:  Defaults to 24 hours for `users/password_reset` template,
-    7 days for all others. Your application may override this by setting
-    `vars.expire` in the `app.email.send` vars.
-  - Add `vars.site`
-    - The result of `app.conf.get('site')`.
-    - Required for the default email templates:
-      - `site.title`
-      - `site.email`
-    - Your application may override this by setting `vars.site` in the
-    `app.email.send` vars.
-  - Add `vars.url`
-    - A url build of the conf's `site.protocol`, `site.domain`, and a pathname
-    appended with the generated token. The pathnames are:
-      - `/forgot/{token}`
-      - `/account-confirm/{token}`
-      - `/email-confirm/{token}`
-      - `/account-invitation/{token}`
-    Your application may override this by setting `vars.url` in the
-    `app.email.send` vars.
+Add a loader to the hook `email:load:templates` which will load email templates
+from an additional directory, with an optional weight.

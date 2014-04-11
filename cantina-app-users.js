@@ -22,7 +22,7 @@ app.conf.add({
         }
       },
       authenticate: {
-        status: ['active']
+        allowedStatus: ['active']   //Users must have one of these statuses in order to log in
       }
     }
   }
@@ -79,7 +79,7 @@ app.users = {
       if (user) {
         app.users.checkPassword(user, pass, function (err, valid) {
           if (err) return cb(err);
-          if (valid && conf.authenticate.status.indexOf(user.status) >= 0) {
+          if (valid) {
             return cb(null, app.users.sanitize(user));
           }
           else {
@@ -96,7 +96,7 @@ app.users = {
   authenticate: function (email, pass, req, res, next) {
     app.users.findByAuth(email, pass, function (err, user) {
       if (err) return next(err);
-      if (user) {
+      if (user && conf.authenticate.allowedStatus.indexOf(user.status) >= 0) {
         return app.auth.logIn(user, req, res, next);
       }
       else {

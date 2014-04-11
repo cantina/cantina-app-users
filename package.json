@@ -32,7 +32,7 @@
     "cantina-redis": "cantina/cantina-redis#3.x",
     "cantina-session": "cantina/cantina-session#3.x",
     "cantina-auth": "cantina/cantina-auth#3.x",
-    "cantina-web": "cantina/cantina-web#3.x",
+    "cantina-web": "cantina/cantina-web#3.2.x",
     "cantina-email": "cantina/cantina-email#3.x",
     "cantina-tokens": "cantina/cantina-tokens#3.x",
     "mocha": "^1.18.2",

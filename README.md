@@ -27,7 +27,8 @@ Table of Contents
     - [`app.users.sanitize(user)`](#appuserssanitizeuser)
   - [`app.auth`](#appauth)
     - [`app.auth.logIn(user, req, res, next)`](#appauthloginuser-req-res-next)
-    - [`app.auth.killSession(user, cb)`](#appauthkillsessionuser-cb)
+    - [`app.auth.killSession(user, sessionID, cb)`](#appauthkillsessionuser-sessionid-cb)
+    - [`app.auth.killAllSessions(user, cb)`](#appauthkillallsessionsuser-cb)
     - [`app.auth.logOut(req, cb)`](#appauthlogoutreq-cb)
   - [`app.serializeUser(user, cb)`](#appserializeuseruser-cb)
   - [`app.deserializeUser(id, cb)`](#appdeserializeuserid-cb)
@@ -184,7 +185,7 @@ a sanitized user model, if match is found.
 
 #### `app.users.authenticate(email, password, req, res, next)`
 
-Loads the user via `findByAuth` and invokes `req.logIn`.
+Loads the user via `findByAuth`, checks that the user's status is active, and invokes `app.auth.logIn`.
 
 #### `app.users.setPassword(user, password, cb)`
 
@@ -207,7 +208,11 @@ Namespace for authentication-related API
 Invokes `req.logIn` and adds the `req.sessionID` to a set of sessionIDs for the
  user in redis.
 
-#### `app.auth.killSession(user, cb)`
+#### `app.auth.killSession(user, sessionID, cb)`
+
+Destroys the session and removes the sessionID from user's set in redis.
+
+#### `app.auth.killAllSessions(user, cb)`
 
 Loads the user's sessionIDs from redis and destroys each. Deletes the user's
 set of sessionIDs in redis.

@@ -1,3 +1,3 @@
 assert = require('assert');
 idgen = require('idgen');
-request = require('request');
+superagent = require('superagent');

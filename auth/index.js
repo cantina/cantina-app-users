@@ -24,7 +24,7 @@ app.auth.logIn = function (user, req, res, next) {
   });
 };
 
-app.auth.killSession = function (user, cb) {
+app.auth.killAllSessions = function (user, cb) {
   var key = app.redisKey('sessions', user.id ? user.id : user);
   app.redis.SMEMBERS(key, function (err, members) {
     if (err) return cb(err);
@@ -38,6 +38,13 @@ app.auth.killSession = function (user, cb) {
   });
 };
 
+app.auth.killSession = function (user, session_id, cb) {
+  app.sessions.destroy(session_id, function (err) {
+    if (err) return cb(err);
+    app.redis.SREM(app.redisKey('sessions', user.id), session_id, cb);
+  });
+};
+
 app.auth.logOut = function (req, cb) {
   var user = req.user;
   if (!user) {
@@ -45,7 +52,7 @@ app.auth.logOut = function (req, cb) {
     return cb();
   }
   req.logOut();
-  app.auth.killSession(user, cb);
+  app.auth.killSession(user, req.sessionID, cb);
 };
 
 app.hook('model:afterDestroy:users').add(function (user, done) {

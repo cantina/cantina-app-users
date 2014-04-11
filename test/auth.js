@@ -1,7 +1,8 @@
 describe('authentication', function () {
   var app
     , user
-    , pass = 'password';
+    , pass = 'password'
+    , userRequest;
 
   before(function (done) {
     app = require('cantina');
@@ -34,7 +35,6 @@ describe('authentication', function () {
           });
         });
         controller.get('/test-logout', function (req, res) {
-          req.user || (req.user = user);
           app.auth.logOut(req, function (err) {
             if (err) {
               console.log(err);
@@ -110,7 +110,8 @@ describe('authentication', function () {
   });
 
   it('should be able to authenticate a user', function (done) {
-    request('http://localhost:3000/test-login?email=' + user.email_lc + '&pass=' + pass,  function (error, response) {
+    userRequest = superagent.agent();
+    userRequest.get('http://localhost:3000/test-login?email=' + user.email_lc + '&pass=' + pass,  function (error, response) {
       assert.ifError(error);
       assert.equal(response.statusCode, 200);
       done();
@@ -126,8 +127,8 @@ describe('authentication', function () {
     });
   });
 
-  it('should delete all sessions upon logout', function (done) {
-    request.get('http://localhost:3000/test-logout',  function (error, response) {
+  it('should delete the sessions upon logout', function (done) {
+    userRequest.get('http://localhost:3000/test-logout',  function (error, response) {
       assert.ifError(error);
       assert.equal(response.statusCode, 200);
       var key = app.redisKey('sessions', user.id);
@@ -135,6 +136,27 @@ describe('authentication', function () {
         assert.ifError(err);
         assert(!members.length);
         done();
+      });
+    })
+  });
+
+  it('can delete all sessions', function (done) {
+    userRequest.get('http://localhost:3000/test-login?email=' + user.email_lc + '&pass=' + pass,   function (error, response) {
+      assert.ifError(error);
+      assert.equal(response.statusCode, 200);
+      var userRequest2 = superagent.agent();
+      userRequest2.get('http://localhost:3000/test-login?email=' + user.email_lc + '&pass=' + pass,   function (error, response) {
+        assert.ifError(error);
+        assert.equal(response.statusCode, 200);
+        app.auth.killAllSessions(user, function (err) {
+          assert.ifError(err);
+          var key = app.redisKey('sessions', user.id);
+          app.redis.SMEMBERS(key, function (err, members) {
+            assert.ifError(err);
+            assert(!members.length);
+            done();
+          });
+        });
       });
     })
   });

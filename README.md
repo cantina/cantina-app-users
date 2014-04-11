@@ -13,7 +13,6 @@ Table of Contents
 - [Default Admin User](#default-admin-user)
   - [Configuring](#configuring)
 - [Schemas](#schemas)
-  - [Provides](#provides)
 - [Authentication](#authentication)
   - [Example](#example)
 - [Email](#email)
@@ -26,7 +25,6 @@ Table of Contents
     - [`app.users.setPassword(user, password, cb)`](#appuserssetpassworduser-password-cb)
     - [`app.users.checkPassword(user, password, cb)`](#appuserscheckpassworduser-password-cb)
     - [`app.users.sanitize(user)`](#appuserssanitizeuser)
-  - [`app.loadSchemas(dir, cwd)`](#apploadschemas-dir-cwd)
   - [`app.auth`](#appauth)
     - [`app.auth.logIn(user, req, res, next)`](#appauthloginuser-req-res-next)
     - [`app.auth.killSession(user, cb)`](#appauthkillsessionuser-cb)
@@ -35,9 +33,6 @@ Table of Contents
   - [`app.deserializeUser(id, cb)`](#appdeserializeuserid-cb)
   - [`app.verifyTwitterUser(token, tokenSecret, profile, done)`](#appverifytwitteruser-token-tokensecret-profile-done)
   - [`app.verifyFacebookUser(token, tokenSecret, profile, done)`](#appverifyfacebookuser-token-tokensecret-profile-done)
-  - [`app.email`](#appemail)
-    - [`app.email.send (name, vars, cb)`](#appemailsend-name-vars-cb)
-    - [`app.email.loadTemplates (templateDir, weight)`](#appemailloadtemplates-templatedir-weight)
 
 Usage
 -----
@@ -83,18 +78,14 @@ Schemas
 
 Provides schemas for [cantina-models](https://github.com/cantina/cantina-models)
 
-### Provides
-
-- **app.schemas**
-  - Loaded schemas, keyed by name.
-- **app.Schema**
-  - The Schema class. Instances are created from definitions loaded by `app.loadSchemas()`.
+See [cantina-models-schemas](https://github.com/cantina/cantina-models-schemas)
+for details.
 
 Authentication
 --------------
 
 Provides a standard implementation of the functionality required by
-cantina-auth, as well as session management.
+[cantina-auth](https://github.com/cantina/cantina-auth), as well as session management.
 
 ### Example
 
@@ -139,7 +130,8 @@ app.hook('model:destroy:user', function (user, next) {
 Email
 -----
 
-Provides templates and hooks for emails user account related emails.
+Provides templates and hooks for [cantina-email](https://github.com/cantina/cantina-email)
+user account related emails.
 
 ### Templates
 Provides defaults for:
@@ -243,16 +235,3 @@ the existing user account with matching `email`on `app.collections.user`.
 
 Implements account verification for cantina-auth-facebook. Creates or updates
 the existing user account with matching `email`on `app.collections.user`.
-
-### `app.email`
-
-Namespace for email API
-
-#### `app.email.send (name, vars, cb)`
-
-Send an email using a named template.
-
-#### `app.email.loadTemplates (templateDir, weight)`
-
-Add a loader to the hook `email:load:templates` which will load email templates
-from an additional directory, with an optional weight.

@@ -5,6 +5,7 @@ require('cantina-validators');
 
 module.exports = {
   name: 'user',
+  version: '0.1.0',
   indexes: {
     mongo: [
       [ { email_lc: 1 }, { unique: true } ],

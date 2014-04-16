@@ -49,7 +49,7 @@ describe('basic', function (){
   });
 
   it('supports native findOne', function (done) {
-    app.collections.users.findOne({ 'name.first': obj.name.first }, { 'name.last': 0 }, function (err, entity) {
+    app.collections.users._findOne({ 'name.first': obj.name.first }, { 'name.last': 0 }, function (err, entity) {
       assert.ifError(err);
       assert(entity);
       assert.strictEqual(entity.id, obj.id);
@@ -60,7 +60,7 @@ describe('basic', function (){
   });
 
   it('supports native find', function (done) {
-    app.collections.users.find({ 'name.first': obj.name.first }).toArray(function (err, results) {
+    app.collections.users._find({ 'name.first': obj.name.first }).toArray(function (err, results) {
       assert.ifError(err);
       assert(results);
       assert.equal(results.length, 1);
@@ -72,7 +72,7 @@ describe('basic', function (){
   it('creates the default admin user', function (done) {
     var defaultAdmin = app.conf.get('app:users:admin:attributes');
     assert.equal(defaultAdmin.email, 'dev@terraeclipse.com'); // just to be sure
-    app.collections.users.findOne({ email: defaultAdmin.email }, function (err, user) {
+    app.collections.users._findOne({ email: defaultAdmin.email }, function (err, user) {
       assert.ifError(err);
       assert(user);
       assert.strictEqual(user.email, defaultAdmin.email);
@@ -124,5 +124,5 @@ describe('basic', function (){
       assert(savedUser.username);
       done();
     });
-  })
+  });
 });

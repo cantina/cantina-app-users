@@ -46,13 +46,13 @@ app.hook('start').add(function (done) {
       app.schemas.user.indexes.mongo.forEach(function (idx) {
         // An index could be an array containing an optional options hash as the second argument
         tasks.push(function (next) {
-          collection.ensureIndex.apply(collection, (Array.isArray(idx) ? idx : [idx]).concat(next));
+          collection._ensureIndex.apply(collection, (Array.isArray(idx) ? idx : [idx]).concat(next));
         });
       });
       if (conf.admin.status !== 'disabled') {
         tasks.push(function (next) {
           var defaultAdmin = conf.admin.attributes;
-          collection.findOne({ email: defaultAdmin.email }, function (err, user) {
+          collection._findOne({ email: defaultAdmin.email }, function (err, user) {
             if (err) return next(err);
             if (user) return next();
             user = collection.create(defaultAdmin);
@@ -74,7 +74,7 @@ app.hook('start').add(function (done) {
 app.users = {
 
   findByAuth: function (email, pass, cb) {
-    app.collections.users.findOne({email_lc: email}, function (err, user) {
+    app.collections.users._findOne({email_lc: email}, function (err, user) {
       if (err) return cb(err);
       if (user) {
         app.users.checkPassword(user, pass, function (err, valid) {

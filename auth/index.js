@@ -20,7 +20,10 @@ app.auth = {};
 app.auth.logIn = function (user, req, res, next) {
   req.logIn(user, function (err){
     if (err) return next(err);
-    app.redis.SADD(app.redisKey('sessions', user.id), req.sessionID, next);
+    app.hook('user:logIn').run(user, req.session, function (err) {
+      if (err) return app.emit('error', err);
+      app.redis.SADD(app.redisKey('sessions', user.id), req.sessionID, next);
+    });
   });
 };
 
@@ -52,7 +55,10 @@ app.auth.logOut = function (req, cb) {
     return cb();
   }
   req.logOut();
-  app.auth.killSession(user, req.sessionID, cb);
+  app.hook('user:logOut').run(user, req.session, function (err) {
+    if (err) return app.emit('error', err);
+    app.auth.killSession(user, req.sessionID, cb);
+  });
 };
 
 app.hook('model:afterDestroy:users').add(function (user, done) {

@@ -166,4 +166,41 @@ describe('authentication', function () {
     done();
   })
 
+
+  it('should run hooks on user login', function (done) {
+    var calledDone = false;
+    app.hook('user:logIn').add(function (user, session, next) {
+      assert(user);
+      assert(session);
+      next();
+      if (!calledDone) {
+        calledDone = true;
+        setTimeout(function () {
+          done();
+        }, 1000);
+      }
+    });
+    userRequest = superagent.agent();
+    userRequest.get('http://localhost:3000/test-login?email=' + user.email_lc + '&pass=' + pass,  function (error, response) {
+      assert.ifError(error);
+      assert.equal(response.statusCode, 200);
+    });
+  });
+
+  it('should run hooks on user logout', function (done) {
+    var calledDone = false;
+    app.hook('user:logOut').add(function (user, session, next) {
+      assert(user);
+      assert(session);
+      next();
+      if (!calledDone) {
+        calledDone = true;
+        done();
+      }
+    });
+    userRequest.get('http://localhost:3000/test-logout',  function (error, response) {
+      assert.ifError(error);
+      assert.equal(response.statusCode, 200);
+    });
+  });
 });

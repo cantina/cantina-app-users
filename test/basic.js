@@ -125,4 +125,15 @@ describe('basic', function (){
       done();
     });
   });
+
+  it('hides properties defined as private by the schema', function (done) {
+    app.collections.users.load({ username: 'captain' }, function (err, user) {
+      assert.ifError(err);
+      assert(user);
+      assert.strictEqual(user.name.first, obj.name.first);
+      assert.strictEqual(user.name.last, obj.name.last);
+      assert.strictEqual(user.auth, undefined);
+      done();
+    });
+  });
 });

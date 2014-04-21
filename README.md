@@ -1,9 +1,10 @@
 cantina-app-users
 =================
 
-Provides a solid foundation for users in a cantina application. Includes the
-user model, and authentication.
-
+Provides a basic, extensible user system for a
+[cantina](https://github.com/cantina/cantina) application. Includes the user
+model (with an extensible default schema), authentication, and default email
+templates for basic user account-related emails.
 
 Table of Contents
 -----------------
@@ -38,7 +39,9 @@ Table of Contents
 Usage
 -----
 
-[Generally describe how to use the user system, what parts can be overridden, etc.]
+Most of the provided defaults are easily overridden via configuration (`etc`) or
+application hooks (`app.hook`). Default email templates can be overridden by
+providing an alternative template having the same name.
 
 Default Schema
 --------------

@@ -1,6 +1,7 @@
 var app = require('cantina')
   , _ = require('underscore')
-  , async = require('async');
+  , async = require('async')
+  , bcrypt = require('bcrypt');
 
 app.serializeUser = function (user, cb) {
   cb(null, user.id);
@@ -25,6 +26,20 @@ app.auth.logIn = function (user, req, res, next) {
       app.redis.SADD(app.redisKey('sessions', user.id), req.sessionID, next);
     });
   });
+};
+
+
+app.auth.setPassword = function (user, newPass, cb) {
+  var rounds = app.conf.get('auth:rounds') || 12;
+  bcrypt.hash(newPass, rounds, function (err, hash) {
+    if (err) return cb(err);
+    user.auth = hash;
+    cb(null, hash);
+  });
+};
+
+app.auth.checkPassword = function (user, pass, cb) {
+  bcrypt.compare(pass, user.auth, cb);
 };
 
 app.auth.killAllSessions = function (user, cb) {

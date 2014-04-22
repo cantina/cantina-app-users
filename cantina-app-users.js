@@ -1,6 +1,5 @@
 var app = require('cantina')
-  , async = require('async')
-  , bcrypt = require('bcrypt');
+  , async = require('async');
 
 require('cantina-models-mongo');
 require('cantina-models-schemas');
@@ -56,7 +55,7 @@ app.hook('start').add(function (done) {
             if (err) return next(err);
             if (user) return next();
             user = collection.create(defaultAdmin);
-            app.users.setPassword(user, user.password, function (err) {
+            app.auth.setPassword(user, user.password, function (err) {
               if (err) return next(err);
               delete user.password;
               collection.save(user, next);
@@ -68,19 +67,17 @@ app.hook('start').add(function (done) {
       else async.series(tasks, done);
     }
   }));
-});
 
 
-app.users = {
+  app.collections.users.findByAuth = function (email, pass, cb) {
 
-  findByAuth: function (email, pass, cb) {
     app.collections.users._findOne({email_lc: email}, function (err, user) {
       if (err) return cb(err);
       if (user) {
-        app.users.checkPassword(user, pass, function (err, valid) {
+        app.auth.checkPassword(user, pass, function (err, valid) {
           if (err) return cb(err);
-          if (valid) {
-            return cb(null, app.users.sanitize(user));
+          if (valid && conf.authenticate.allowedStatus.indexOf(user.status) >= 0) {
+            return cb(null, app.collections.users.sanitize(user));
           }
           else {
             cb();
@@ -91,35 +88,10 @@ app.users = {
         cb();
       }
     });
-  },
+  };
 
-  authenticate: function (email, pass, req, res, next) {
-    app.users.findByAuth(email, pass, function (err, user) {
-      if (err) return next(err);
-      if (user && conf.authenticate.allowedStatus.indexOf(user.status) >= 0) {
-        return app.auth.logIn(user, req, res, next);
-      }
-      else {
-        return next(new Error('Invalid email/password combination'));
-      }
-    });
-  },
-
-  setPassword: function (user, newPass, cb) {
-    var rounds = app.conf.get('auth:rounds') || 12;
-    bcrypt.hash(newPass, rounds, function (err, hash) {
-      if (err) return cb(err);
-      user.auth = hash;
-      cb(null, hash);
-    });
-  },
-
-  checkPassword: function (user, pass, cb) {
-    bcrypt.compare(pass, user.auth, cb);
-  },
-
-  sanitize: function (user) {
+  app.collections.users.sanitize = function (user) {
     delete user.auth;
     return user;
-  }
-};
+  };
+});

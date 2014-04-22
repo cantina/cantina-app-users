@@ -95,7 +95,7 @@ describe('basic', function (){
     app.collections.users.create(dupe, function (err) {
       assert(err);
       assert.equal(err.name, 'MongoError', err.message);
-      assert(err.message.match(/^E11000 duplicate key error index: cantina-app-users-test-[^.]+\.users\.\$email_lc_1 /), 'Unexpected error message: ' + err.message);
+      assert(err.message.match(/E11000 duplicate key error index: cantina-app-users-test-[^.]+\.users\.\$email_lc_1 /), 'Unexpected error message: ' + err.message);
       done();
     });
   });
@@ -109,7 +109,7 @@ describe('basic', function (){
     app.collections.users.create(dupe, function (err) {
       assert(err);
       assert.equal(err.name, 'MongoError', err.message);
-      assert(err.message.match(/^E11000 duplicate key error index: cantina-app-users-test-[^.]+\.users\.\$username_lc_1 /), 'Unexpected error message: ' + err.message);
+      assert(err.message.match(/E11000 duplicate key error index: cantina-app-users-test-[^.]+\.users\.\$username_lc_1 /), 'Unexpected error message: ' + err.message);
       done();
     });
   });

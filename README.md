@@ -19,14 +19,12 @@ Table of Contents
   - [Templates](#templates)
   - [Hooks](#hooks)
 - [API Reference](#api-reference)
-  - [`app.users`](#appusers)
-    - [`app.users.findByAuth(email, password, cb)`](#appusersfindbyauthemail-password-cb)
-    - [`app.users.authenticate(email, password, req, res, next)`](#appusersauthenticateemail-password-req-res-next)
-    - [`app.users.setPassword(user, password, cb)`](#appuserssetpassworduser-password-cb)
-    - [`app.users.checkPassword(user, password, cb)`](#appuserscheckpassworduser-password-cb)
-    - [`app.users.sanitize(user)`](#appuserssanitizeuser)
+  - [`app.collections.users`](#appcollectionsusers)
+    - [`app.collections.users.findByAuth(email, password, cb)`](#appcollectionsusersfindbyauthemail-password)
   - [`app.auth`](#appauth)
     - [`app.auth.logIn(user, req, res, next)`](#appauthloginuser-req-res-next)
+    - [`app.auth.setPassword(user, password, cb)`](#appauthsetpassworduser-password-cb)
+    - [`app.auth.checkPassword(user, password, cb)`](#appauthcheckpassworduser-password-cb)
     - [`app.auth.killSession(user, sessionID, cb)`](#appauthkillsessionuser-sessionid-cb)
     - [`app.auth.killAllSessions(user, cb)`](#appauthkillallsessionsuser-cb)
     - [`app.auth.logOut(req, cb)`](#appauthlogoutreq-cb)
@@ -103,7 +101,7 @@ controller.post('/login', function (req, res, next) {
       return next();
     }
 
-    app.users.authenticate(req.body.email.trim(), req.body.pass, req, res, function (err) {
+    app.collections.users.findByAuth(req.body.email.trim(), req.body.pass, function (err) {
       if (err) {
         res.formError('login', err.message);
         return next();
@@ -174,30 +172,14 @@ The hook will perform the following:
 API Reference
 -------------
 
-### `app.users`
+### `app.collections.users`
 
-Namespace for user API
+Exentded namespace for user models
 
-#### `app.users.findByAuth(email, password, cb)`
+#### `app.collections.users.findByAuth(email, password, cb)`
 
 Load user with matching email from the database and verifies password. Returns
 a sanitized user model, if match is found.
-
-#### `app.users.authenticate(email, password, req, res, next)`
-
-Loads the user via `findByAuth`, checks that the user's status is active, and invokes `app.auth.logIn`.
-
-#### `app.users.setPassword(user, password, cb)`
-
-Sets the auth property on the user model to be a `bcrypt` hash of the password
-
-#### `app.users.checkPassword(user, password, cb)`
-
-Checks the password against the user's auth property using `bcrypt.compare`
-
-#### `app.users.sanitize(user)`
-
-Modifies and returns the user model without the auth property
 
 ### `app.auth`
 
@@ -207,6 +189,14 @@ Namespace for authentication-related API
 
 Invokes `req.logIn` and adds the `req.sessionID` to a set of sessionIDs for the
  user in redis.
+
+#### `app.auth.setPassword(user, password, cb)`
+
+Sets the auth property on the user model to be a `bcrypt` hash of the password
+
+#### `app.auth.checkPassword(user, password, cb)`
+
+Checks the password against the user's auth property using `bcrypt.compare`
 
 #### `app.auth.killSession(user, sessionID, cb)`
 

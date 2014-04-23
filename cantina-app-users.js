@@ -42,6 +42,10 @@ app.hook('start').add(function (done) {
      * 2) unless disabled, ensure the default admin user has been created
      */
     init: function (collection) {
+      // Expose schema methods
+      ['sanitize', 'defaults', 'prepare', 'validate'].forEach(function (method) {
+        collection[method] = app.schemas.user[method] || function noop () {};
+      });
       var tasks = [];
       app.schemas.user.indexes.mongo.forEach(function (idx) {
         // An index could be an array containing an optional options hash as the second argument

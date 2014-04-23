@@ -63,32 +63,32 @@ app.hook('start').add(function (done) {
           });
         });
       }
-      if (tasks.length === 0) done();
-      else async.series(tasks, done);
-    }
-  }));
 
+      collection.findByAuth = function (email, pass, cb) {
 
-  app.collections.users.findByAuth = function (email, pass, cb) {
-
-    app.collections.users._findOne({email_lc: email}, function (err, user) {
-      if (err) return cb(err);
-      if (user) {
-        app.auth.checkPassword(user, pass, function (err, valid) {
+        collection._findOne({email_lc: email}, function (err, user) {
           if (err) return cb(err);
-          if (valid && conf.authenticate.allowedStatus.indexOf(user.status) >= 0) {
-            return cb(null, app.collections.users.sanitize(user));
+          if (user) {
+            app.auth.checkPassword(user, pass, function (err, valid) {
+              if (err) return cb(err);
+              if (valid && conf.authenticate.allowedStatus.indexOf(user.status) >= 0) {
+                return cb(null, collection.sanitize(user));
+              }
+              else {
+                cb();
+              }
+            });
           }
           else {
             cb();
           }
         });
-      }
-      else {
-        cb();
-      }
-    });
-  };
+      };
+
+      if (tasks.length === 0) done();
+      else async.series(tasks, done);
+    }
+  }));
 
   app.collections.users.sanitize = function (user) {
     delete user.auth;

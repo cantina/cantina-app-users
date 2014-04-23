@@ -155,21 +155,21 @@ The hook will perform the following:
     - `expire`:  Defaults to 24 hours for `users/password_reset` template,
     7 days for all others. Your application may override this by setting
     `vars.expire` in the `app.email.send` vars.
-  - Add `vars.site`
-    - The result of `app.conf.get('site')`.
+  - Add `vars.app`
+    - The result of `app.conf.get('app')`.
     - Required for the default email templates:
-      - `site.title`
-      - `site.email`
-    - Your application may override this by setting `vars.site` in the
+      - `app.title`
+      - `app.email`
+    - Your application may override this by setting `vars.app` in the
     `app.email.send` vars.
   - Add `vars.url`
-    - A url build of the conf's `site.protocol`, `site.domain`, and a pathname
+    - A url build of the conf's `app.protocol`, `app.domain`, and a pathname
     appended with the generated token. The pathnames are:
       - `/forgot/{token}`
       - `/account-confirm/{token}`
       - `/email-confirm/{token}`
       - `/account-invitation/{token}`
-    Your application may override this by setting `vars.url` in the
+    Your application may override this by setting `vars.pathname` or `vars.url` in the
     `app.email.send` vars.
 
 API Reference

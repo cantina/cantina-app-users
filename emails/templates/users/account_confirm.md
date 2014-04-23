@@ -1,11 +1,11 @@
 ---
 to: '{{{user.name.full}}} <{{user.email}}>'
-from: '{{{site.title}}} <{{site.email}}>'
-subject: 'Complete your account at {{{site.title}}}'
+from: '{{{app.title}}} <{{app.email}}>'
+subject: 'Complete your account at {{{app.title}}}'
 ---
 Greetings {{{user.name.full}}}!
 
-Welcome to {{{site.title}}}!
+Welcome to {{{app.title}}}!
 
 Please complete your account by following the link below:
 
@@ -13,4 +13,4 @@ Please complete your account by following the link below:
 
 Regards,
 
-The {{{site.title}}} team.
+The {{{app.title}}} team.

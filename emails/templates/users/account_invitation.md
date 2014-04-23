@@ -1,11 +1,11 @@
 ---
 to: '{{{user.name.full}}} <{{user.email}}>'
-from: '{{{site.title}}} <{{site.email}}>'
-subject: 'Create your account at {{{site.title}}}'
+from: '{{{app.title}}} <{{app.email}}>'
+subject: 'Create your account at {{{app.title}}}'
 ---
 Greetings {{{user.name.full}}}!
 
-You have been invited to join {{{site.title}}}.
+You have been invited to join {{{app.title}}}.
 
 Please finish creating your account by following the link below:
 
@@ -13,4 +13,4 @@ Please finish creating your account by following the link below:
 
 Regards,
 
-The {{{site.title}}} team.
+The {{{app.title}}} team.

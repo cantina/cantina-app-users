@@ -1,11 +1,11 @@
 ---
 to: '{{{user.name.full}}} <{{user.email}}>'
-from: '{{{site.title}}} <{{site.email}}>'
+from: '{{{app.title}}} <{{app.email}}>'
 subject: 'Password reset request'
 ---
 Hello {{{user.name.full}}},
 
-A request was made at {{{site.title}}} to reset the password of the account associated with this email address. If the request was not made by you, please disregard this message.
+A request was made at {{{app.title}}} to reset the password of the account associated with this email address. If the request was not made by you, please disregard this message.
 
 To reset your password, please visit the address below:
 
@@ -13,4 +13,4 @@ To reset your password, please visit the address below:
 
 Regards,
 
-The {{{site.title}}} team.
+The {{{app.title}}} team.

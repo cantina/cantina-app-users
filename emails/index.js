@@ -1,5 +1,5 @@
 var app = require('cantina')
-  , site = app.conf.get('site')
+  , conf = app.conf.get('app')
   , url = require('url');
 
 require('cantina-tokens');
@@ -21,12 +21,13 @@ app.hook('email:send:before').add(function (name, vars, cb) {
     app.tokens.create(vars.user.id, opts, function (err, token) {
       if (err) return cb(err);
 
+      var pathname = vars.pathname || 'forgot';
       vars.url = vars.url || url.format({
-        protocol: site.protocol,
-        host: site.domain,
-        pathname: '/forgot/' + token
+        protocol: conf.protocol || 'http',
+        host: conf.domain,
+        pathname: '/' + pathname + '/' + token
       });
-      vars.site || (vars.site = site);
+      vars.app || (vars.app = conf);
       cb();
     });
   }
@@ -42,13 +43,13 @@ app.hook('email:send:before').add(function (name, vars, cb) {
     app.tokens.create(vars.user.id, opts, function (err, token) {
       if (err) return cb(err);
 
-      var pathname = name.replace(/users\//, '').replace(/_/g, '-');
+      var pathname = vars.pathname || name.replace(/users\//, '').replace(/_/g, '-');
       vars.url = vars.url || url.format({
-        protocol: site.protocol,
-        host: site.domain,
+        protocol: conf.protocol || 'http',
+        host: conf.domain,
         pathname: '/' + pathname + '/' + token
       });
-      vars.site || (vars.site = site);
+      vars.app || (vars.app = conf);
       cb();
     });
   }

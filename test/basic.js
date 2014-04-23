@@ -136,4 +136,31 @@ describe('basic', function (){
       done();
     });
   });
+
+  it('has schema-defined model methods', function () {
+    assert.ok(typeof app.collections.users.sanitize === 'function');
+    assert.ok(typeof app.collections.users.defaults === 'function');
+    assert.ok(typeof app.collections.users.prepare === 'function');
+    assert.ok(typeof app.collections.users.validate === 'function');
+    var user = {
+      name: {
+        first: obj.name.first,
+        last: obj.name.last
+      },
+      email: 'schema-test@user.name',
+      auth: 'password'
+    };
+    assert.strictEqual(user.status, undefined);
+    app.collections.users.defaults(user);
+    assert(user.status);
+    assert.strictEqual(user.name.full, undefined);
+    app.collections.users.prepare(user);
+    assert(user.name.full);
+    delete user.email;
+    var valid = app.collections.users.validate(user);
+    assert(valid instanceof Error);
+    assert(user.auth);
+    app.collections.users.sanitize(user);
+    assert.strictEqual(user.auth, undefined);
+  });
 });

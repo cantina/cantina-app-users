@@ -93,9 +93,4 @@ app.hook('start').add(function (done) {
       else async.series(tasks, done);
     }
   }));
-
-  app.collections.users.sanitize = function (user) {
-    delete user.auth;
-    return user;
-  };
 });

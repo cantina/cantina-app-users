@@ -51,7 +51,7 @@ app.hook('start').add(function (done) {
       if (conf.admin.status !== 'disabled') {
         tasks.push(function (next) {
           var defaultAdmin = conf.admin.attributes;
-          collection._findOne({ email: defaultAdmin.email }, function (err, user) {
+          collection._findOne({ email_lc: defaultAdmin.email.toLowerCase() }, function (err, user) {
             if (err) return next(err);
             if (user) return next();
             user = collection.create(defaultAdmin);

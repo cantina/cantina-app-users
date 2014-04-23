@@ -1,11 +1,11 @@
 ---
 to: '{{{user.name.full}}} <{{user.email}}>'
-from: '{{{site.title}}} <{{site.email}}>'
-subject: 'Confirm your email address at {{{site.title}}}'
+from: '{{{app.title}}} <{{app.email}}>'
+subject: 'Confirm your email address at {{{app.title}}}'
 ---
 Greetings {{{user.name.full}}},
 
-Your email address on {{{site.title}}} has recently changed.
+Your email address on {{{app.title}}} has recently changed.
 
 Please confirm your new email address by following the link below:
 
@@ -13,4 +13,4 @@ Please confirm your new email address by following the link below:
 
 Regards,
 
-The {{{site.title}}} team.
+The {{{app.title}}} team.

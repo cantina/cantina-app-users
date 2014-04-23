@@ -1,5 +1,5 @@
 var app = require('cantina')
-  , site = app.conf.get('site')
+  , conf = app.conf.get('app')
   , url = require('url');
 
 require('cantina-tokens');
@@ -22,11 +22,11 @@ app.hook('email:send:before').add(function (name, vars, cb) {
       if (err) return cb(err);
 
       vars.url = vars.url || url.format({
-        protocol: site.protocol,
-        host: site.domain,
+        protocol: conf.protocol,
+        host: conf.domain,
         pathname: '/forgot/' + token
       });
-      vars.site || (vars.site = site);
+      vars.app || (vars.app = conf);
       cb();
     });
   }
@@ -44,11 +44,11 @@ app.hook('email:send:before').add(function (name, vars, cb) {
 
       var pathname = name.replace(/users\//, '').replace(/_/g, '-');
       vars.url = vars.url || url.format({
-        protocol: site.protocol,
-        host: site.domain,
+        protocol: conf.protocol,
+        host: conf.domain,
         pathname: '/' + pathname + '/' + token
       });
-      vars.site || (vars.site = site);
+      vars.app || (vars.app = conf);
       cb();
     });
   }

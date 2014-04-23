@@ -105,7 +105,7 @@ describe('authentication', function () {
   });
 
   it('should be able to load a user by email/pass', function (done) {
-    app.collections.users.findByAuth(user.email_lc, pass, function (err, foundUser) {
+    app.collections.users.findByAuth(user.email, pass, function (err, foundUser) {
       assert.ifError(err);
       assert(foundUser);
       assert.equal(foundUser.id, user.id);
@@ -123,7 +123,7 @@ describe('authentication', function () {
 
   it('should be able to authenticate a user', function (done) {
     userRequest = superagent.agent();
-    userRequest.get('http://localhost:3000/test-login?email=' + user.email_lc + '&pass=' + pass,  function (error, response) {
+    userRequest.get('http://localhost:3000/test-login?email=' + user.email + '&pass=' + pass,  function (error, response) {
       assert.ifError(error);
       assert.equal(response.statusCode, 200);
       done();
@@ -153,11 +153,11 @@ describe('authentication', function () {
   });
 
   it('can delete all sessions', function (done) {
-    userRequest.get('http://localhost:3000/test-login?email=' + user.email_lc + '&pass=' + pass,   function (error, response) {
+    userRequest.get('http://localhost:3000/test-login?email=' + user.email + '&pass=' + pass,   function (error, response) {
       assert.ifError(error);
       assert.equal(response.statusCode, 200);
       var userRequest2 = superagent.agent();
-      userRequest2.get('http://localhost:3000/test-login?email=' + user.email_lc + '&pass=' + pass,   function (error, response) {
+      userRequest2.get('http://localhost:3000/test-login?email=' + user.email + '&pass=' + pass,   function (error, response) {
         assert.ifError(error);
         assert.equal(response.statusCode, 200);
         app.auth.killAllSessions(user, function (err) {
@@ -193,7 +193,7 @@ describe('authentication', function () {
       }
     });
     userRequest = superagent.agent();
-    userRequest.get('http://localhost:3000/test-login?email=' + user.email_lc + '&pass=' + pass,  function (error, response) {
+    userRequest.get('http://localhost:3000/test-login?email=' + user.email + '&pass=' + pass,  function (error, response) {
       assert.ifError(error);
       assert.equal(response.statusCode, 200);
     });

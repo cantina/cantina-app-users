@@ -20,7 +20,7 @@ function createOrUpdateProfile (data, done) {
   // Verify user data, then load/save the user model.
   if (data && data.provider_id) {
 
-    app.collections.users.findOne({'email_lc': data.email.toLowerCase()}, function(err, user) {
+    app.collections.users.load({'email_lc': data.email.toLowerCase()}, function(err, user) {
       if (err) return done(err);
       if (user) {
         // Update local user data from upstream

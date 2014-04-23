@@ -19,17 +19,29 @@ describe('authentication', function () {
         var controller = app.controller();
 
         controller.get('/test-login', function (req, res, next) {
-          app.users.authenticate(req.query.email, req.query.pass, req, res, function (err) {
+          app.collections.users.findByAuth(req.query.email, req.query.pass, function (err, user) {
             if (err) {
               console.log(err);
               res.renderStatus(500);
             }
-            if (req.isAuthenticated()) {
-              res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
-              res.end('<body>Welcome!</body>');
+            if (user) {
+              app.auth.logIn(user, req, res, function (err) {
+                if (err) {
+                  console.log(err);
+                  res.renderStatus(500);
+                }
+                if (req.isAuthenticated()) {
+                  res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
+                  res.end('<body>Welcome!</body>');
+                }
+                else {
+                  console.log('Error: not authenticated');
+                  res.renderStatus(403);
+                }
+              });
             }
             else {
-              console.log('Error: not authenticated');
+              console.log('Error: not found');
               res.renderStatus(403);
             }
           });
@@ -70,7 +82,7 @@ describe('authentication', function () {
   });
 
   it('should be able to set a user\'s password', function (done) {
-    app.users.setPassword(user, pass, function (err) {
+    app.auth.setPassword(user, pass, function (err) {
       assert.ifError(err);
       assert(user.auth);
       app.collections.users.save(user, function (err) {
@@ -81,10 +93,10 @@ describe('authentication', function () {
   });
 
   it('should be able to check a user\'s password', function (done) {
-    app.users.checkPassword(user, pass, function (err, valid) {
+    app.auth.checkPassword(user, pass, function (err, valid) {
       assert.ifError(err);
       assert(valid);
-      app.users.checkPassword(user, 'foo', function (err, invalid) {
+      app.auth.checkPassword(user, 'foo', function (err, invalid) {
         assert.ifError(err);
         assert(!invalid);
         done();
@@ -93,7 +105,7 @@ describe('authentication', function () {
   });
 
   it('should be able to load a user by email/pass', function (done) {
-    app.users.findByAuth(user.email_lc, pass, function (err, foundUser) {
+    app.collections.users.findByAuth(user.email_lc, pass, function (err, foundUser) {
       assert.ifError(err);
       assert(foundUser);
       assert.equal(foundUser.id, user.id);
@@ -104,7 +116,7 @@ describe('authentication', function () {
 
   it('should be able to sanitize a user model', function (done) {
     assert(user.auth);
-    app.users.sanitize(user);
+    app.collections.users.sanitize(user);
     assert(!user.auth);
     done();
   });

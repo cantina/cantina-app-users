@@ -21,10 +21,11 @@ app.hook('email:send:before').add(function (name, vars, cb) {
     app.tokens.create(vars.user.id, opts, function (err, token) {
       if (err) return cb(err);
 
+      var pathname = vars.pathname || 'forgot';
       vars.url = vars.url || url.format({
         protocol: conf.protocol,
         host: conf.domain,
-        pathname: '/forgot/' + token
+        pathname: '/' + pathname + '/' + token
       });
       vars.app || (vars.app = conf);
       cb();
@@ -42,7 +43,7 @@ app.hook('email:send:before').add(function (name, vars, cb) {
     app.tokens.create(vars.user.id, opts, function (err, token) {
       if (err) return cb(err);
 
-      var pathname = name.replace(/users\//, '').replace(/_/g, '-');
+      var pathname = vars.pathname || name.replace(/users\//, '').replace(/_/g, '-');
       vars.url = vars.url || url.format({
         protocol: conf.protocol,
         host: conf.domain,

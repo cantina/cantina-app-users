@@ -70,13 +70,14 @@ app.hook('start').add(function (done) {
 
       collection.findByAuth = function (email, pass, cb) {
 
-        collection._findOne({email_lc: email}, function (err, user) {
+        collection._findOne({email_lc: email.toLowerCase()}, function (err, user) {
           if (err) return cb(err);
           if (user) {
             app.auth.checkPassword(user, pass, function (err, valid) {
               if (err) return cb(err);
               if (valid && conf.authenticate.allowedStatus.indexOf(user.status) >= 0) {
-                return cb(null, collection.sanitize(user));
+                collection.sanitize(user);
+                return cb(null, user);
               }
               else {
                 cb();

@@ -23,7 +23,7 @@ app.hook('email:send:before').add(function (name, vars, cb) {
 
       var pathname = vars.pathname || 'forgot';
       vars.url = vars.url || url.format({
-        protocol: conf.protocol,
+        protocol: conf.protocol || 'http',
         host: conf.domain,
         pathname: '/' + pathname + '/' + token
       });
@@ -45,7 +45,7 @@ app.hook('email:send:before').add(function (name, vars, cb) {
 
       var pathname = vars.pathname || name.replace(/users\//, '').replace(/_/g, '-');
       vars.url = vars.url || url.format({
-        protocol: conf.protocol,
+        protocol: conf.protocol || 'http',
         host: conf.domain,
         pathname: '/' + pathname + '/' + token
       });

@@ -1,5 +1,4 @@
-var app = require('cantina')
-  , async = require('async');
+var app = require('cantina')  ;
 
 require('cantina-models-mongo');
 require('cantina-models-schemas');
@@ -41,57 +40,48 @@ app.hook('start').add(function (done) {
      * 2) unless disabled, ensure the default admin user has been created
      */
     init: function (collection) {
-      // Expose schema methods
-      ['sanitize', 'defaults', 'prepare', 'validate'].forEach(function (method) {
-        collection[method] = app.schemas.user[method] || function noop () {};
-      });
-      var tasks = [];
-      app.schemas.user.indexes.mongo.forEach(function (idx) {
-        // An index could be an array containing an optional options hash as the second argument
-        tasks.push(function (next) {
-          collection._ensureIndex.apply(collection, (Array.isArray(idx) ? idx : [idx]).concat(next));
-        });
-      });
-      if (conf.admin.status !== 'disabled') {
-        tasks.push(function (next) {
+
+      // Extend the collection with schema and additional helper methods
+      app.schemas.user.attach(collection, function (err) {
+        if (err) return done(err);
+        collection.findByAuth = function findByAuth (email, pass, cb) {
+          collection._findOne({email_lc: email.toLowerCase()}, function (err, user) {
+            if (err) return cb(err);
+            if (user) {
+              app.auth.checkPassword(user, pass, function (err, valid) {
+                if (err) return cb(err);
+                if (valid && conf.authenticate.allowedStatus.indexOf(user.status) >= 0) {
+                  collection.sanitize(user);
+                  return cb(null, user);
+                }
+                else {
+                  cb();
+                }
+              });
+            }
+            else {
+              cb();
+            }
+          });
+        };
+
+        // Create the default admin user
+        if (conf.admin.status !== 'disabled') {
           var defaultAdmin = conf.admin.attributes;
           collection._findOne({ email_lc: defaultAdmin.email.toLowerCase() }, function (err, user) {
-            if (err) return next(err);
-            if (user) return next();
+            if (err) return done(err);
+            if (user) return done();
             user = collection.create(defaultAdmin);
             app.auth.setPassword(user, user.password, function (err) {
-              if (err) return next(err);
+              if (err) return done(err);
               delete user.password;
-              collection.save(user, next);
+              collection.save(user, done);
             });
           });
-        });
-      }
+        }
+        else done();
+      });
 
-      collection.findByAuth = function (email, pass, cb) {
-
-        collection._findOne({email_lc: email.toLowerCase()}, function (err, user) {
-          if (err) return cb(err);
-          if (user) {
-            app.auth.checkPassword(user, pass, function (err, valid) {
-              if (err) return cb(err);
-              if (valid && conf.authenticate.allowedStatus.indexOf(user.status) >= 0) {
-                collection.sanitize(user);
-                return cb(null, user);
-              }
-              else {
-                cb();
-              }
-            });
-          }
-          else {
-            cb();
-          }
-        });
-      };
-
-      if (tasks.length === 0) done();
-      else async.series(tasks, done);
     }
   }));
 });

@@ -157,8 +157,9 @@ describe('basic', function (){
     app.collections.users.prepare(user);
     assert(user.name.full);
     delete user.email;
-    var valid = app.collections.users.validate(user);
-    assert(valid instanceof Error);
+    var err = app.collections.users.validate(user);
+    assert(Array.isArray(err) && err.length);
+    err.every(function (e) { return assert(e instanceof Error); });
     assert(user.auth);
     app.collections.users.sanitize(user);
     assert.strictEqual(user.auth, undefined);

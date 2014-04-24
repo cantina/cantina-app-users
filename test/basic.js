@@ -1,7 +1,8 @@
 describe('basic', function (){
 
   var app
-    , obj = { name: { first: 'Jean-Luc', last: 'Picard' }, username: 'captain', email: 'jlp@enterprise.com', id: idgen() };
+    , obj = { name: { first: 'Jean-Luc', last: 'Picard' }, username: 'captain', email: 'jlp@enterprise.com', id: idgen() }
+    , admin;
 
   function assertModel (actual, expected) {
     Object.keys(expected).forEach(function (prop) {
@@ -22,6 +23,12 @@ describe('basic', function (){
     app.boot(function(err) {
       if (err) return done(err);
       app.conf.set('mongo:db', 'cantina-app-users-test-' + idgen());
+
+      require('cantina-permissions');
+      app.permissions.define('site', {
+        admin: [ 'administrate' ]
+      });
+      app.conf.set('app:users:admin:permissions', { site: [ 'admin' ] });
       require('../');
       app.silence();
       app.start(done);
@@ -82,8 +89,13 @@ describe('basic', function (){
           last: defaultAdmin.name.last,
           full: defaultAdmin.name.first + ' ' + defaultAdmin.name.last,
           sortable: defaultAdmin.name.last + ', ' + defaultAdmin.name.first });
+      admin = user;
       done();
     });
+  });
+
+  it('assigns the configured default permissions to admin user', function (done) {
+    app.permissions.site.hasRole('admin', admin, done);
   });
 
   it('cannot create a second user with the same email address', function (done) {

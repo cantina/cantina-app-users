@@ -1,7 +1,9 @@
-var app = require('cantina')  ;
+var app = require('cantina')
+  , async = require('async');
 
 require('cantina-models-mongo');
 require('cantina-models-schemas');
+require('cantina-permissions');
 
 // Default conf
 app.conf.add({
@@ -67,7 +69,8 @@ app.hook('start').add(function (done) {
 
         // Create the default admin user
         if (conf.admin.status !== 'disabled') {
-          var defaultAdmin = conf.admin.attributes;
+          var defaultAdmin = conf.admin.attributes
+            , defaultPermissions = conf.admin.permissions;
           collection._findOne({ email_lc: defaultAdmin.email.toLowerCase() }, function (err, user) {
             if (err) return done(err);
             if (user) return done();
@@ -75,7 +78,18 @@ app.hook('start').add(function (done) {
             app.auth.setPassword(user, user.password, function (err) {
               if (err) return done(err);
               delete user.password;
-              collection.save(user, done);
+              collection.save(user, function (err) {
+                if (err) return done(err);
+                // Grant any default permissions
+                if (!defaultPermissions) return done();
+                async.each(Object.keys(defaultPermissions), function (ctx, nextCtx) {
+                  if (!app.permissions[ctx]) return nextCtx(new Error('Permissions context not defined ' + ctx));
+                  var permissions = Array.isArray(defaultPermissions[ctx]) ? defaultPermissions[ctx] : [defaultPermissions[ctx]];
+                  async.each(permissions, function (permission, nextPermission) {
+                    app.permissions[ctx].grant(permission, user.id, nextPermission);
+                  }, nextCtx);
+                }, done);
+              });
             });
           });
         }

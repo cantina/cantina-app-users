@@ -5,7 +5,7 @@
   "description": "Drop-in users system for Cantina apps",
   "main": "cantina-app-users.js",
   "scripts": {
-    "test": "node_modules/.bin/mocha"
+    "test": "make test"
   },
   "repository": {
     "type": "git",

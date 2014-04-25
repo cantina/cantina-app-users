@@ -9,8 +9,9 @@ describe('authentication', function () {
     app.boot(function (err) {
       if (err) return done(err);
 
-      app.conf.set('mongo:db', 'cantina-app-users-test-' + idgen());
-      app.conf.set('redis:prefix', 'cantina-app-users-test-' + idgen());
+      var uniq = idgen();
+      app.conf.set('mongo:db', 'cantina-app-users-test-' + uniq);
+      app.conf.set('redis:prefix', 'cantina-app-users-test-' + uniq);
       app.conf.set('auth-twitter', {});
       require('../');
       require('cantina-web');
@@ -78,7 +79,13 @@ describe('authentication', function () {
 
   after(function (done) {
     app.mongo.dropDatabase(function () {
-      app.destroy(done);
+      app.redis.KEYS(app.redisKey('*'), function (err, keys) {
+        async.each(keys, function (key, next) {
+          app.redis.DEL(key, next);
+        }, function (err) {
+          app.destroy(done);
+        });
+      });
     });
   });
 

@@ -1,5 +1,4 @@
 var app = require('cantina')
-  , _ = require('underscore')
   , async = require('async')
   , bcrypt = require('bcrypt');
 

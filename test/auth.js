@@ -13,6 +13,7 @@ describe('authentication', function () {
       app.conf.set('redis:prefix', 'cantina-app-users-test-' + idgen());
       app.conf.set('auth-twitter', {});
       require('../');
+      require('cantina-web');
       app.silence();
       app.start(function (err) {
         if (err) return done(err);

@@ -101,9 +101,17 @@ app.hook('start').add(function (done) {
    * Ensure that the app startup does not continue --
    * because `done` is not called -- until the init hook has completed
    */
-  app.once('app-users:init:complete', done);
+  isInitComplete(done);
 });
 
+var _initComplete = false;
 function initComplete (err) {
+  _initComplete = err || true;
   app.emit('app-users:init:complete', err);
+}
+
+// init may or may not complete before the start hooks run
+function isInitComplete (cb) {
+  if (_initComplete) return cb(_initComplete instanceof Error ? _initComplete : null);
+  app.once('app-users:init:complete', cb);
 }

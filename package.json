@@ -1,7 +1,7 @@
 {
   "name": "cantina-app-users",
   "private": true,
-  "version": "3.0.5",
+  "version": "3.0.6",
   "description": "Drop-in users system for Cantina apps",
   "main": "cantina-app-users.js",
   "scripts": {

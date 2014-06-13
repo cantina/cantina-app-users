@@ -5,8 +5,6 @@ var app = require('cantina')
 require('cantina-tokens');
 require('cantina-email');
 
-app.email.loadTemplates(require('path').resolve(__dirname, './templates'));
-
 app.hook('email:send:before').add(function (name, vars, cb) {
   var opts;
 

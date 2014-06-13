@@ -170,8 +170,10 @@ describe('basic', function (){
     assert(user.name.full);
     delete user.email;
     var err = app.collections.users.validate(user);
-    assert(Array.isArray(err) && err.length);
-    err.every(function (e) { return assert(e instanceof Error); });
+    assert(err instanceof Error);
+    assert.equal(err.code, 'ECANTINANOTVALID');
+    assert(Array.isArray(err.properties) && err.properties.length);
+    err.properties.every(function (e) { return assert(e instanceof Error); });
     assert(user.auth);
     app.collections.users.sanitize(user);
     assert.strictEqual(user.auth, undefined);

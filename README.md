@@ -233,3 +233,10 @@ the existing user account with matching `email`on `app.collections.user`.
 
 Implements account verification for cantina-auth-facebook. Creates or updates
 the existing user account with matching `email`on `app.collections.user`.
+
+- - -
+
+### Developed by [Terra Eclipse](http://www.terraeclipse.com)
+
+Terra Eclipse, Inc. is a nationally recognized political technology and
+strategy firm located in Santa Cruz, CA and Washington, D.C.

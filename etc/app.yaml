@@ -1,0 +1,14 @@
+users:
+  admin:
+    status: 'enabled'
+    attributes:
+      name:
+        first: 'Web'
+        last:  'Team'
+      username: 'admin'
+      email: 'dev@terraeclipse.com'
+      password: 'admin'
+  authenticate:
+    # Users must have one of these statuses in order to log in.
+    allowedStatus:
+      - active

@@ -1,13 +1,13 @@
-var app = require('cantina');
+module.exports = function (app) {
+  app.load('conf');
 
-app.load('conf');
+  app.require('cantina-models-schemas');
+  app.require('cantina-models-mongo');
+  app.require('cantina-permissions');
+  app.require('./email');
 
-require('cantina-models-schemas');
-require('cantina-models-mongo');
-require('cantina-permissions');
-require('./email');
-
-app.load('schemas');
-app.load('plugins');
-app.load('email');
-app.load('collections');
+  app.load('schemas');
+  app.load('plugins');
+  app.load('email');
+  app.load('collections');
+};

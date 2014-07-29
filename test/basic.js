@@ -19,17 +19,17 @@ describe('basic', function (){
   }
 
   before(function (done) {
-    app = require('cantina');
+    app = require('cantina').createApp();
     app.boot(function(err) {
       if (err) return done(err);
       app.conf.set('mongo:db', 'cantina-app-users-test-' + idgen());
 
-      require('cantina-permissions');
+      app.require('cantina-permissions');
       app.permissions.define('site', {
         admin: [ 'administrate' ]
       });
       app.conf.set('app:users:admin:permissions', { site: [ 'admin' ] });
-      require('../');
+      app.require('../');
       app.silence();
       app.start(done);
     });

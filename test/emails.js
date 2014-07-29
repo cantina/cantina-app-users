@@ -3,7 +3,7 @@ describe('emails', function () {
     , url = require('url');
 
   before(function (done) {
-    app = require('cantina');
+    app = require('cantina').createApp();
     app.boot(function (err) {
       assert.ifError(err);
 
@@ -16,7 +16,7 @@ describe('emails', function () {
           title: 'Test Suite Site'
         }
       });
-      require('../');
+      app.require('../');
 
       app.start(done);
     });

@@ -5,14 +5,14 @@ describe('authentication', function () {
     , userRequest;
 
   before(function (done) {
-    app = require('cantina');
+    app = require('cantina').createApp();
     app.boot(function (err) {
       if (err) return done(err);
 
       app.conf.set('mongo:db', 'cantina-app-users-test-' + idgen());
       app.conf.set('redis:prefix', 'cantina-app-users-test-' + idgen());
       app.conf.set('auth-twitter', {});
-      require('../');
+      app.require('../');
       app.silence();
       app.start(function (err) {
         if (err) return done(err);

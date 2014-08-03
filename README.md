@@ -49,15 +49,17 @@ Provides the [default user schema](schemas/user.js).
 ### Extending
 
 ```js
-app.Schema.extend(app.schemas.user, {
-  properties: {
-    someprop: {
-    type: 'string',
-    default: '',
-    required: true
+module.exports = function (app) {
+  app.Schema.extend(app.schemas.user, {
+    properties: {
+      someprop: {
+      type: 'string',
+      default: '',
+      required: true
+      }
     }
-  }
-});
+  });
+};
 ```
 
 Default Admin User
@@ -92,41 +94,46 @@ Provides a standard implementation of the functionality required by
 ### Example
 
 ```js
-var app = require('cantina')
-  , controller = module.exports = app.controller();
+module.exports = function (app) {
+  var controller = app.controller();
 
-controller.post('/login', function (req, res, next) {
-  if (!req.body) {
-      return next(new Error('Invalid post data'));
-    }
-    if (!req.body.email || !req.body.pass) {
-      res.formError('login', 'Email and password are both required.');
-      return next();
-    }
-
-    app.collections.users.findByAuth(req.body.email.trim(), req.body.pass, function (err) {
-      if (err) {
-        res.formError('login', err.message);
+  controller.post('/login', function (req, res, next) {
+    if (!req.body) {
+        return next(new Error('Invalid post data'));
+      }
+      if (!req.body.email || !req.body.pass) {
+        res.formError('login', 'Email and password are both required.');
         return next();
       }
-      res.redirect('/');
-    });
-}
 
-controller.post('/logout', function (req, res, next) {
-  app.auth.logOut(req, function (err) {
-    if (err) return res.renderError(err);
-    res.redirect('/login');
+      app.collections.users.findByAuth(req.body.email.trim(), req.body.pass, function (err) {
+        if (err) {
+          res.formError('login', err.message);
+          return next();
+        }
+        res.redirect('/');
+      });
+  }
+
+  controller.post('/logout', function (req, res, next) {
+    app.auth.logOut(req, function (err) {
+      if (err) return res.renderError(err);
+      res.redirect('/login');
+    });
   });
-});
+
+  return controller;
+};
 ```
 
 ```js
-app.hook('model:destroy:user', function (user, next) {
+module.exports = function (app) {
+  app.hook('model:destroy:user', function (user, next) {
 
-  // Kill the user's active sessions
-  app.auth.killSession(user, next);
-});
+    // Kill the user's active sessions
+    app.auth.killSession(user, next);
+  });
+};
 ```
 
 Email
